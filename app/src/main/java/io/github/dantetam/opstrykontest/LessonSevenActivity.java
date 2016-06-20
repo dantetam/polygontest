@@ -130,9 +130,10 @@ public class LessonSevenActivity extends Activity {
 			@Override
 			public void run() {
 				if (usingVbos) {
-					((Button) findViewById(R.id.button_switch_VBOs)).setText(R.string.lesson_seven_using_VBOs);
+					//((Button) findViewById(R.id.button_switch_VBOs)).setText(R.string.lesson_seven_using_VBOs);
+					((Button) findViewById(R.id.button_switch_VBOs)).setText("VBOs");
 				} else {
-					((Button) findViewById(R.id.button_switch_VBOs)).setText(R.string.lesson_seven_not_using_VBOs);
+					((Button) findViewById(R.id.button_switch_VBOs)).setText("No VBOs");
 				}
 			}
 		});
@@ -143,9 +144,9 @@ public class LessonSevenActivity extends Activity {
 			@Override
 			public void run() {
 				if (useStride) {
-					((Button) findViewById(R.id.button_switch_stride)).setText(R.string.lesson_seven_using_stride);
+					((Button) findViewById(R.id.button_switch_stride)).setText("Stride");
 				} else {
-					((Button) findViewById(R.id.button_switch_stride)).setText(R.string.lesson_seven_not_using_stride);
+					((Button) findViewById(R.id.button_switch_stride)).setText("No stride");
 				}
 			}
 		});
