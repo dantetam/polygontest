@@ -58,19 +58,9 @@ public class LessonSevenActivity extends Activity {
 			}
 		});
 
-		findViewById(R.id.button_switch_VBOs).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				toggleVBOs();
-			}
-		});
+		//findViewById(R.id.button_switch_VBOs).setOnClickListener
 		
-		findViewById(R.id.button_switch_stride).setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				toggleStride();
-			}
-		});
+		//findViewById(R.id.button_switch_stride).setOnClickListener
 	}
 
 	@Override
@@ -107,48 +97,4 @@ public class LessonSevenActivity extends Activity {
 		});
 	}
 
-	private void toggleVBOs() {
-		mGLSurfaceView.queueEvent(new Runnable() {
-			@Override
-			public void run() {
-				mRenderer.toggleVBOs();
-			}
-		});
-	}
-	
-	protected void toggleStride() {
-		mGLSurfaceView.queueEvent(new Runnable() {
-			@Override
-			public void run() {
-				mRenderer.toggleStride();
-			}
-		});	
-	}
-
-	public void updateVboStatus(final boolean usingVbos) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (usingVbos) {
-					//((Button) findViewById(R.id.button_switch_VBOs)).setText(R.string.lesson_seven_using_VBOs);
-					((Button) findViewById(R.id.button_switch_VBOs)).setText("VBOs");
-				} else {
-					((Button) findViewById(R.id.button_switch_VBOs)).setText("No VBOs");
-				}
-			}
-		});
-	}
-
-	public void updateStrideStatus(final boolean useStride) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (useStride) {
-					((Button) findViewById(R.id.button_switch_stride)).setText("Stride");
-				} else {
-					((Button) findViewById(R.id.button_switch_stride)).setText("No stride");
-				}
-			}
-		});
-	}
 }

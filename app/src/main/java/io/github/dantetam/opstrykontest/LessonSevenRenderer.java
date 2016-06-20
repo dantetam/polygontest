@@ -85,12 +85,6 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	private int mLastRequestedCubeFactor;
 	private int mActualCubeFactor;
 	
-	/** Control whether vertex buffer objects or client-side memory will be used for rendering. */
-	private boolean mUseVBOs = true;	
-	
-	/** Control whether strides will be used. */
-	private boolean mUseStride = true;
-	
 	/** Size of the position data in elements. */
 	static final int POSITION_DATA_SIZE = 3;	
 	
@@ -137,19 +131,15 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mGlSurfaceView = glSurfaceView;
 	}
 
-	private void generateCubes(int cubeFactor, boolean toggleVbos, boolean toggleStride) {
-		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor, toggleVbos, toggleStride));		
+	private void generateCubes(int cubeFactor) {
+		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor));
 	}
 	
 	class GenDataRunnable implements Runnable {
 		final int mRequestedCubeFactor;
-		final boolean mToggleVbos;
-		final boolean mToggleStride;
 		
-		GenDataRunnable(int requestedCubeFactor, boolean toggleVbos, boolean toggleStride) {
-			mRequestedCubeFactor = requestedCubeFactor; 
-			mToggleVbos = toggleVbos;	
-			mToggleStride = toggleStride;
+		GenDataRunnable(int requestedCubeFactor) {
+			mRequestedCubeFactor = requestedCubeFactor;
 		}
 		
 		@Override
@@ -319,36 +309,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 						System.gc();
 						
 						try {
-							boolean useVbos = mUseVBOs;
-							boolean useStride = mUseStride;	
-							
-							if (mToggleVbos) {
-								useVbos = !useVbos;
-							}
-							
-							if (mToggleStride) {
-								useStride = !useStride;
-							}
-							
-							if (useStride) {
-								if (useVbos) {
-									mCubes = new CubesWithVboWithStride(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor);											
-								} else {
-									mCubes = new CubesClientSideWithStride(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor);
-								}
-							} else {
-								if (useVbos) {
-									mCubes = new CubesWithVbo(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor);											
-								} else {
-									mCubes = new CubesClientSide(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor);
-								}
-							}	
-																			
-							mUseVBOs = useVbos;
-							mLessonSevenActivity.updateVboStatus(mUseVBOs);
-						
-							mUseStride = useStride;
-							mLessonSevenActivity.updateStrideStatus(mUseStride);																					
+							mCubes = new CubesRenderer(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor);
 							
 							mActualCubeFactor = mRequestedCubeFactor;
 						} catch (OutOfMemoryError err) {
@@ -385,29 +346,21 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
 	public void decreaseCubeCount() {
 		if (mLastRequestedCubeFactor > 1) {
-			generateCubes(--mLastRequestedCubeFactor, false, false);
+			generateCubes(--mLastRequestedCubeFactor);
 		}
 	}
 
 	public void increaseCubeCount() {
 		if (mLastRequestedCubeFactor < 16) {
-			generateCubes(++mLastRequestedCubeFactor, false, false);
+			generateCubes(++mLastRequestedCubeFactor);
 		}
 	}	
-	
-	public void toggleVBOs() {		
-		generateCubes(mLastRequestedCubeFactor, true, false);		
-	}
-	
-	public void toggleStride() {
-		generateCubes(mLastRequestedCubeFactor, false, true);		
-	}
-	
+
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
 	{		
 		mLastRequestedCubeFactor = mActualCubeFactor = 3;
-		generateCubes(mActualCubeFactor, false, false);			
+		generateCubes(mActualCubeFactor);
 		
 		// Set the background clear color to black.
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -507,8 +460,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
         // Draw a cube.
         // Translate the cube into the screen.
         Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -3.5f);     
-        
+        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -3.5f);
+
         // Set a matrix that contains the current rotation.
         Matrix.setIdentityM(mCurrentRotation, 0);        
     	Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
@@ -556,15 +509,16 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glUniform1i(mTextureUniformHandle, 0);
         
 		if (mCubes != null) {
-			mCubes.render();
+			mCubes.render(0);
 		}
 	}		
 	
 	abstract class Cubes {
-		abstract void render();
 
-		abstract void release();	
-		
+        abstract void renderAll();
+        abstract void render(int indexBlock);
+        abstract void release();
+
 		FloatBuffer[] getBuffers(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
 			// First, copy cube information into client-side floating point buffers.
 			final FloatBuffer cubePositionsBuffer;
@@ -628,165 +582,10 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 	
-	class CubesClientSide extends Cubes {
-		private FloatBuffer mCubePositions;
-		private FloatBuffer mCubeNormals;
-		private FloatBuffer mCubeTextureCoordinates;
-
-		CubesClientSide(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {	
-			FloatBuffer[] buffers = getBuffers(cubePositions, cubeNormals, cubeTextureCoordinates, generatedCubeFactor);
-			
-			mCubePositions = buffers[0];
-			mCubeNormals = buffers[1];
-			mCubeTextureCoordinates = buffers[2];
-		}
-
-		@Override
-		public void render() {				        
-			// Pass in the position information
-			GLES20.glEnableVertexAttribArray(mPositionHandle);
-			GLES20.glVertexAttribPointer(mPositionHandle, POSITION_DATA_SIZE, GLES20.GL_FLOAT, false, 0, mCubePositions);
-
-			// Pass in the normal information
-			GLES20.glEnableVertexAttribArray(mNormalHandle);
-			GLES20.glVertexAttribPointer(mNormalHandle, NORMAL_DATA_SIZE, GLES20.GL_FLOAT, false, 0, mCubeNormals);
-			
-			// Pass in the texture information
-			GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
-			GLES20.glVertexAttribPointer(mTextureCoordinateHandle, TEXTURE_COORDINATE_DATA_SIZE, GLES20.GL_FLOAT, false,
-					0, mCubeTextureCoordinates);
-
-			// Draw the cubes.
-			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mActualCubeFactor * mActualCubeFactor * mActualCubeFactor * 36);
-		}
-
-		@Override
-		public void release() {
-			mCubePositions.limit(0);
-			mCubePositions = null;
-			mCubeNormals.limit(0);
-			mCubeNormals = null;
-			mCubeTextureCoordinates.limit(0);
-			mCubeTextureCoordinates = null;
-		}
-	}
-	
-	class CubesClientSideWithStride extends Cubes {
-		private FloatBuffer mCubeBuffer;		
-
-		CubesClientSideWithStride(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {	
-			mCubeBuffer = getInterleavedBuffer(cubePositions, cubeNormals, cubeTextureCoordinates, generatedCubeFactor);						
-		}
-
-		@Override
-		public void render() {				
-			final int stride = (POSITION_DATA_SIZE + NORMAL_DATA_SIZE + TEXTURE_COORDINATE_DATA_SIZE) * BYTES_PER_FLOAT;
-			
-			// Pass in the position information
-			mCubeBuffer.position(0);
-			GLES20.glEnableVertexAttribArray(mPositionHandle);			
-			GLES20.glVertexAttribPointer(mPositionHandle, POSITION_DATA_SIZE, GLES20.GL_FLOAT, false, stride, mCubeBuffer);
-
-			// Pass in the normal information
-			mCubeBuffer.position(POSITION_DATA_SIZE);
-			GLES20.glEnableVertexAttribArray(mNormalHandle);			
-			GLES20.glVertexAttribPointer(mNormalHandle, NORMAL_DATA_SIZE, GLES20.GL_FLOAT, false, stride, mCubeBuffer);
-			
-			// Pass in the texture information
-			mCubeBuffer.position(POSITION_DATA_SIZE + NORMAL_DATA_SIZE);
-			GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);		
-			GLES20.glVertexAttribPointer(mTextureCoordinateHandle, TEXTURE_COORDINATE_DATA_SIZE, GLES20.GL_FLOAT, false,
-					stride, mCubeBuffer);			
-
-			// Draw the cubes.
-			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mActualCubeFactor * mActualCubeFactor * mActualCubeFactor * 36);
-		}
-
-		@Override
-		public void release() {
-			mCubeBuffer.limit(0);
-			mCubeBuffer = null;
-		}
-	}
-	
-	class CubesWithVbo extends Cubes {
-		final int mCubePositionsBufferIdx;
-		final int mCubeNormalsBufferIdx;
-		final int mCubeTexCoordsBufferIdx;
-
-		CubesWithVbo(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
-			FloatBuffer[] floatBuffers = getBuffers(cubePositions, cubeNormals, cubeTextureCoordinates, generatedCubeFactor);
-			
-			FloatBuffer cubePositionsBuffer = floatBuffers[0];
-			FloatBuffer cubeNormalsBuffer = floatBuffers[1];
-			FloatBuffer cubeTextureCoordinatesBuffer = floatBuffers[2];			
-			
-			// Second, copy these buffers into OpenGL's memory. After, we don't need to keep the client-side buffers around.					
-			final int buffers[] = new int[3];
-			GLES20.glGenBuffers(3, buffers, 0);						
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, cubePositionsBuffer.capacity() * BYTES_PER_FLOAT, cubePositionsBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[1]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, cubeNormalsBuffer.capacity() * BYTES_PER_FLOAT, cubeNormalsBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[2]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, cubeTextureCoordinatesBuffer.capacity() * BYTES_PER_FLOAT, cubeTextureCoordinatesBuffer,
-					GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-
-			mCubePositionsBufferIdx = buffers[0];
-			mCubeNormalsBufferIdx = buffers[1];
-			mCubeTexCoordsBufferIdx = buffers[2];
-			
-			cubePositionsBuffer.limit(0);
-			cubePositionsBuffer = null;
-			cubeNormalsBuffer.limit(0);
-			cubeNormalsBuffer = null;
-			cubeTextureCoordinatesBuffer.limit(0);
-			cubeTextureCoordinatesBuffer = null;
-		}
-
-		@Override
-		public void render() {	      
-			// Pass in the position information
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mCubePositionsBufferIdx);
-			GLES20.glEnableVertexAttribArray(mPositionHandle);
-			GLES20.glVertexAttribPointer(mPositionHandle, POSITION_DATA_SIZE, GLES20.GL_FLOAT, false, 0, 0);
-
-			// Pass in the normal information
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mCubeNormalsBufferIdx);
-			GLES20.glEnableVertexAttribArray(mNormalHandle);
-			GLES20.glVertexAttribPointer(mNormalHandle, NORMAL_DATA_SIZE, GLES20.GL_FLOAT, false, 0, 0);
-			
-			// Pass in the texture information
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mCubeTexCoordsBufferIdx);
-			GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
-			GLES20.glVertexAttribPointer(mTextureCoordinateHandle, TEXTURE_COORDINATE_DATA_SIZE, GLES20.GL_FLOAT, false,
-					0, 0);
-
-			// Clear the currently bound buffer (so future OpenGL calls do not use this buffer).
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-
-			// Draw the cubes.
-			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mActualCubeFactor * mActualCubeFactor * mActualCubeFactor * 36);
-		}
-
-		@Override
-		public void release() {
-			// Delete buffers from OpenGL's memory
-			final int[] buffersToDelete = new int[] { mCubePositionsBufferIdx, mCubeNormalsBufferIdx,
-					mCubeTexCoordsBufferIdx };
-			GLES20.glDeleteBuffers(buffersToDelete.length, buffersToDelete, 0);
-		}
-	}
-	
-	class CubesWithVboWithStride extends Cubes {
+	class CubesRenderer extends Cubes {
 		final int mCubeBufferIdx;
 
-		CubesWithVboWithStride(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
+		CubesRenderer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
 			FloatBuffer cubeBuffer = getInterleavedBuffer(cubePositions, cubeNormals, cubeTextureCoordinates, generatedCubeFactor);			
 			
 			// Second, copy these buffers into OpenGL's memory. After, we don't need to keep the client-side buffers around.					
@@ -804,8 +603,33 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			cubeBuffer = null;
 		}
 
-		@Override
-		public void render() {	    
+        public void renderAll() {
+            final int stride = (POSITION_DATA_SIZE + NORMAL_DATA_SIZE + TEXTURE_COORDINATE_DATA_SIZE) * BYTES_PER_FLOAT;
+
+            // Pass in the position information
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mCubeBufferIdx);
+            GLES20.glEnableVertexAttribArray(mPositionHandle);
+            GLES20.glVertexAttribPointer(mPositionHandle, POSITION_DATA_SIZE, GLES20.GL_FLOAT, false, stride, 0);
+
+            // Pass in the normal information
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mCubeBufferIdx);
+            GLES20.glEnableVertexAttribArray(mNormalHandle);
+            GLES20.glVertexAttribPointer(mNormalHandle, NORMAL_DATA_SIZE, GLES20.GL_FLOAT, false, stride, POSITION_DATA_SIZE * BYTES_PER_FLOAT);
+
+            // Pass in the texture information
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mCubeBufferIdx);
+            GLES20.glEnableVertexAttribArray(mTextureCoordinateHandle);
+            GLES20.glVertexAttribPointer(mTextureCoordinateHandle, TEXTURE_COORDINATE_DATA_SIZE, GLES20.GL_FLOAT, false,
+                    stride, (POSITION_DATA_SIZE + NORMAL_DATA_SIZE) * BYTES_PER_FLOAT);
+
+            // Clear the currently bound buffer (so future OpenGL calls do not use this buffer).
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+
+            // Draw the cubes.
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mActualCubeFactor * mActualCubeFactor * mActualCubeFactor * 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
+        }
+
+		public void render(int blockIndex) {
 			final int stride = (POSITION_DATA_SIZE + NORMAL_DATA_SIZE + TEXTURE_COORDINATE_DATA_SIZE) * BYTES_PER_FLOAT;
 			
 			// Pass in the position information
@@ -828,10 +652,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
 			// Draw the cubes.
-			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, mActualCubeFactor * mActualCubeFactor * mActualCubeFactor * 36);
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLES, blockIndex*36, 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
 		}
 
-		@Override
 		public void release() {
 			// Delete buffers from OpenGL's memory
 			final int[] buffersToDelete = new int[] { mCubeBufferIdx };
