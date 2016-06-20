@@ -372,14 +372,14 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);						
 		
 		// Position the eye in front of the origin.
-		final float eyeX = 0.0f;
-		final float eyeY = 0.0f;
-		final float eyeZ = -0.5f;
+		final float eyeX = 4.0f;
+		final float eyeY = 4.0f;
+		final float eyeZ = 4.0f;
 
 		// We are looking toward the distance
-		final float lookX = 0.0f;
-		final float lookY = 0.0f;
-		final float lookZ = -5.0f;
+		final float lookX = 2.0f;
+		final float lookY = 2.0f;
+		final float lookZ = 2.0f;
 
 		// Set our up vector. This is where our head would be pointing were we holding the camera.
 		final float upX = 0.0f;
@@ -437,79 +437,86 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	public void onDrawFrame(GL10 glUnused) 
 	{		
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);			                                    
-        
-        // Set our per-vertex lighting program.
-        GLES20.glUseProgram(mProgramHandle);   
-        
-        // Set program handles for cube drawing.
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVPMatrix");
-        mMVMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVMatrix"); 
-        mLightPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_LightPos");
-        mTextureUniformHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_Texture");
-        mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");        
-        mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal"); 
-        mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
-        
-        // Calculate position of the light. Push into the distance.
-        Matrix.setIdentityM(mLightModelMatrix, 0);                     
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -1.0f);
-               
-        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
-        Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);                      
-        
-        // Draw a cube.
-        // Translate the cube into the screen.
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, 0.0f, -3.5f);
 
-        // Set a matrix that contains the current rotation.
-        Matrix.setIdentityM(mCurrentRotation, 0);        
-    	Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
-    	Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
-    	mDeltaX = 0.0f;
-    	mDeltaY = 0.0f;
-    	    	
-    	// Multiply the current rotation by the accumulated rotation, and then set the accumulated rotation to the result.
-    	Matrix.multiplyMM(mTemporaryMatrix, 0, mCurrentRotation, 0, mAccumulatedRotation, 0);
-    	System.arraycopy(mTemporaryMatrix, 0, mAccumulatedRotation, 0, 16);
-    	    	
-        // Rotate the cube taking the overall rotation into account.     	
-    	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
-    	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
-    	
-    	// This multiplies the view matrix by the model matrix, and stores
-		// the result in the MVP matrix
-		// (which currently contains model * view).
-		Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+		for (int i = 0; i < mActualCubeFactor * mActualCubeFactor * mActualCubeFactor; i++) {
+			int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
+			int y = (i / mActualCubeFactor) % mActualCubeFactor;
+			int z = i % mActualCubeFactor;
+			// Set our per-vertex lighting program.
+			GLES20.glUseProgram(mProgramHandle);
 
-		// Pass in the modelview matrix.
-		GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mMVPMatrix, 0);
+			// Set program handles for cube drawing.
+			mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVPMatrix");
+			mMVMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVMatrix");
+			mLightPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_LightPos");
+			mTextureUniformHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_Texture");
+			mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");
+			mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal");
+			mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
 
-		// This multiplies the modelview matrix by the projection matrix,
-		// and stores the result in the MVP matrix
-		// (which now contains model * view * projection).
-		Matrix.multiplyMM(mTemporaryMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-		System.arraycopy(mTemporaryMatrix, 0, mMVPMatrix, 0, 16);
+			// Calculate position of the light. Push into the distance.
+			Matrix.setIdentityM(mLightModelMatrix, 0);
+			Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -1.0f);
 
-		// Pass in the combined matrix.
-		GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+			Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
+			Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);
 
-		// Pass in the light position in eye space.
-		GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
-		
-		// Pass in the texture information
-		// Set the active texture unit to texture unit 0.
-		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+			// Draw a cube.
+			// Translate the cube into the screen.
+			Matrix.setIdentityM(mModelMatrix, 0);
+			Matrix.translateM(mModelMatrix, 0, x, y, z);
 
-		// Bind the texture to this unit.
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);
+			// Set a matrix that contains the current rotation.
+			Matrix.setIdentityM(mCurrentRotation, 0);
+			//Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
+			//Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
+			mDeltaX = 0.0f;
+			mDeltaY = 0.0f;
 
-		// Tell the texture uniform sampler to use this texture in the
-		// shader by binding to texture unit 0.
-		GLES20.glUniform1i(mTextureUniformHandle, 0);
-        
-		if (mCubes != null) {
-			mCubes.render(0);
+			// Multiply the current rotation by the accumulated rotation, and then set the accumulated rotation to the result.
+			Matrix.multiplyMM(mTemporaryMatrix, 0, mCurrentRotation, 0, mAccumulatedRotation, 0);
+			System.arraycopy(mTemporaryMatrix, 0, mAccumulatedRotation, 0, 16);
+
+			// Rotate the cube taking the overall rotation into account.
+			Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
+			System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);
+
+			// This multiplies the view matrix by the model matrix, and stores
+			// the result in the MVP matrix
+			// (which currently contains model * view).
+			Matrix.scaleM(mModelMatrix, 0, x/3f, 1, 1);
+
+			Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+
+			// Pass in the modelview matrix.
+			GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mMVPMatrix, 0);
+
+			// This multiplies the modelview matrix by the projection matrix,
+			// and stores the result in the MVP matrix
+			// (which now contains model * view * projection).
+			Matrix.multiplyMM(mTemporaryMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+			System.arraycopy(mTemporaryMatrix, 0, mMVPMatrix, 0, 16);
+
+			// Pass in the combined matrix.
+			GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+
+			// Pass in the light position in eye space.
+			GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
+
+			// Pass in the texture information
+			// Set the active texture unit to texture unit 0.
+			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+			// Bind the texture to this unit.
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);
+
+			// Tell the texture uniform sampler to use this texture in the
+			// shader by binding to texture unit 0.
+			GLES20.glUniform1i(mTextureUniformHandle, 0);
+
+			if (mCubes != null) {
+				mCubes.render(0);
+			}
 		}
 	}		
 	
