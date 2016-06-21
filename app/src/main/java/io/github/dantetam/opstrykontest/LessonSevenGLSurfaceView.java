@@ -42,6 +42,8 @@ public class LessonSevenGLSurfaceView extends GLSurfaceView
 					
 					//mRenderer.mDeltaX += deltaX;
 					//mRenderer.mDeltaY += deltaY;
+					mRenderer.camera.moveShift(-deltaX/10, 0, -deltaY/10);
+					mRenderer.camera.pointShift(-deltaX/10, 0, -deltaY/10);
 				}
 			}	
 			

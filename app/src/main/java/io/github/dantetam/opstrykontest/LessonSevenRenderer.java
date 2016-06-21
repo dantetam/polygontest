@@ -3,6 +3,7 @@ package io.github.dantetam.opstrykontest;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -115,6 +116,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	/** The current cubes object. */
 	private Model mCubes;
 
+	public Camera camera;
+
 	/**
 	 * Initialize the model data.
 	 */
@@ -142,132 +145,132 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 				// orthogonal to the plane of the surface. For a cube model, the normals
 				// should be orthogonal to the points of each face.
 				final float[] cubeNormalData =
-				{												
+				{
 						// Front face
-						0.0f, 0.0f, 1.0f,				
 						0.0f, 0.0f, 1.0f,
 						0.0f, 0.0f, 1.0f,
-						0.0f, 0.0f, 1.0f,				
 						0.0f, 0.0f, 1.0f,
 						0.0f, 0.0f, 1.0f,
-						
-						// Right face 
-						1.0f, 0.0f, 0.0f,				
+						0.0f, 0.0f, 1.0f,
+						0.0f, 0.0f, 1.0f,
+
+						// Right face
 						1.0f, 0.0f, 0.0f,
 						1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, 0.0f,				
 						1.0f, 0.0f, 0.0f,
 						1.0f, 0.0f, 0.0f,
-						
-						// Back face 
-						0.0f, 0.0f, -1.0f,				
+						1.0f, 0.0f, 0.0f,
+						1.0f, 0.0f, 0.0f,
+
+						// Back face
 						0.0f, 0.0f, -1.0f,
 						0.0f, 0.0f, -1.0f,
-						0.0f, 0.0f, -1.0f,				
 						0.0f, 0.0f, -1.0f,
 						0.0f, 0.0f, -1.0f,
-						
-						// Left face 
-						-1.0f, 0.0f, 0.0f,				
+						0.0f, 0.0f, -1.0f,
+						0.0f, 0.0f, -1.0f,
+
+						// Left face
 						-1.0f, 0.0f, 0.0f,
 						-1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f,				
 						-1.0f, 0.0f, 0.0f,
 						-1.0f, 0.0f, 0.0f,
-						
-						// Top face 
-						0.0f, 1.0f, 0.0f,			
+						-1.0f, 0.0f, 0.0f,
+						-1.0f, 0.0f, 0.0f,
+
+						// Top face
 						0.0f, 1.0f, 0.0f,
 						0.0f, 1.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,				
 						0.0f, 1.0f, 0.0f,
 						0.0f, 1.0f, 0.0f,
-						
-						// Bottom face 
-						0.0f, -1.0f, 0.0f,			
+						0.0f, 1.0f, 0.0f,
+						0.0f, 1.0f, 0.0f,
+
+						// Bottom face
 						0.0f, -1.0f, 0.0f,
 						0.0f, -1.0f, 0.0f,
-						0.0f, -1.0f, 0.0f,				
+						0.0f, -1.0f, 0.0f,
+						0.0f, -1.0f, 0.0f,
 						0.0f, -1.0f, 0.0f,
 						0.0f, -1.0f, 0.0f
 				};
-				
+
 				// S, T (or X, Y)
 				// Texture coordinate data.
 				// Because images have a Y axis pointing downward (values increase as you move down the image) while
 				// OpenGL has a Y axis pointing upward, we adjust for that here by flipping the Y axis.
 				// What's more is that the texture coordinates are the same for every face.
 				final float[] cubeTextureCoordinateData =
-				{												
+				{
 						// Front face
-						0.0f, 0.0f, 				
+						0.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 1.0f,
-						1.0f, 0.0f,				
-						
-						// Right face 
-						0.0f, 0.0f, 				
+						1.0f, 0.0f,
+
+						// Right face
+						0.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 1.0f,
-						1.0f, 0.0f,	
-						
-						// Back face 
-						0.0f, 0.0f, 				
+						1.0f, 0.0f,
+
+						// Back face
+						0.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 1.0f,
-						1.0f, 0.0f,	
-						
-						// Left face 
-						0.0f, 0.0f, 				
+						1.0f, 0.0f,
+
+						// Left face
+						0.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 1.0f,
-						1.0f, 0.0f,	
-						
-						// Top face 
-						0.0f, 0.0f, 				
+						1.0f, 0.0f,
+
+						// Top face
+						0.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 1.0f,
-						1.0f, 0.0f,	
-						
-						// Bottom face 
-						0.0f, 0.0f, 				
+						1.0f, 0.0f,
+
+						// Bottom face
+						0.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 0.0f,
 						0.0f, 1.0f,
 						1.0f, 1.0f,
 						1.0f, 0.0f
-				};		
-							
+				};
+
 				final float[] cubePositionData = new float[108 * mRequestedCubeFactor * mRequestedCubeFactor * mRequestedCubeFactor];
 				int cubePositionDataOffset = 0;
-									
+
 				final int segments = mRequestedCubeFactor + (mRequestedCubeFactor - 1);
 				final float minPosition = -1.0f;
 				final float maxPosition = 1.0f;
 				final float positionRange = maxPosition - minPosition;
-				
+
 				for (int x = 0; x < mRequestedCubeFactor; x++) {
 					for (int y = 0; y < mRequestedCubeFactor; y++) {
 						for (int z = 0; z < mRequestedCubeFactor; z++) {
 							final float x1 = minPosition + ((positionRange / segments) * (x * 2));
 							final float x2 = minPosition + ((positionRange / segments) * ((x * 2) + 1));
-							
+
 							final float y1 = minPosition + ((positionRange / segments) * (y * 2));
 							final float y2 = minPosition + ((positionRange / segments) * ((y * 2) + 1));
-							
+
 							final float z1 = minPosition + ((positionRange / segments) * (z * 2));
 							final float z2 = minPosition + ((positionRange / segments) * ((z * 2) + 1));
-							
+
 							// Define points for a cube.
 							// X, Y, Z
 							final float[] p1p = { x1, y2, z2 };
@@ -281,12 +284,12 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
 							final float[] thisCubePositionData = ShapeBuilder.generateCubeData(p1p, p2p, p3p, p4p, p5p, p6p, p7p, p8p,
 									p1p.length);
-							
+
 							System.arraycopy(thisCubePositionData, 0, cubePositionData, cubePositionDataOffset, thisCubePositionData.length);
 							cubePositionDataOffset += thisCubePositionData.length;
 						}
 					}
-				}					
+				}
 				
 				// Run on the GL thread -- the same thread the other members of the renderer run in.
 				mGlSurfaceView.queueEvent(new Runnable() {
@@ -353,7 +356,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
-	{		
+	{
+		mCubes = new Model();
+
 		mLastRequestedCubeFactor = mActualCubeFactor = 3;
 		generateCubes(mActualCubeFactor);
 		
@@ -367,7 +372,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);						
 		
 		// Position the eye in front of the origin.
-		final float eyeX = 4.0f;
+		/*final float eyeX = 4.0f;
 		final float eyeY = 4.0f;
 		final float eyeZ = 4.0f;
 
@@ -379,12 +384,16 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		// Set our up vector. This is where our head would be pointing were we holding the camera.
 		final float upX = 0.0f;
 		final float upY = 1.0f;
-		final float upZ = 0.0f;
+		final float upZ = 0.0f;*/
 
+		camera = new Camera();
+		camera.moveTo(4f, 4f, 4f);
+		camera.pointTo(4f, 2f, 2f);
 		// Set the view matrix. This matrix can be said to represent the camera position.
 		// NOTE: In OpenGL 1, a ModelView matrix is used, which is a combination of a model and
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
-		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
+		mViewMatrix = camera.getViewMatrix();
+		//Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);
 
 		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mLessonSevenActivity, R.raw.lesson_seven_vertex_shader);   		
  		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mLessonSevenActivity, R.raw.lesson_seven_fragment_shader);
@@ -429,17 +438,17 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	}
 
 	/** This will be used to pass in model position information. */
-	public int mPositionHandle;
-
+	//public int mPositionHandle;
 	/** This will be used to pass in model normal information. */
-	public int mNormalHandle;
-
+	//public int mNormalHandle;
 	/** This will be used to pass in model texture coordinate information. */
-	public int mTextureCoordinateHandle;
+	//public int mTextureCoordinateHandle;
 	@Override
 	public void onDrawFrame(GL10 glUnused) 
 	{		
-		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);			                                    
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+		//GLES20.glClearColor(0f/255f, 140f/255f, 255f/255f, 255f/255f);
+		mViewMatrix = camera.getViewMatrix();
 
 		for (int i = 0; i < mCubes.parts.size(); i++) {
 			Solid solid = mCubes.parts.get(i);
@@ -454,9 +463,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			mMVMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVMatrix");
 			mLightPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_LightPos");
 			mTextureUniformHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_Texture");
-			mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");
-			mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal");
-			mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
+			solid.mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");
+			solid.mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal");
+			solid.mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
 
 			// Calculate position of the light. Push into the distance.
 			Matrix.setIdentityM(mLightModelMatrix, 0);
@@ -519,7 +528,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			GLES20.glUniform1i(mTextureUniformHandle, 0);
 
 			if (mCubes != null) {
-				mCubes.parts.get(0).render(0);
+				mCubes.parts.get(0).renderAll();
 			}
 		}
 	}
