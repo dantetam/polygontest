@@ -18,4 +18,10 @@ public class Model {
         parts.add(solid);
     }
 
+    public void release() {
+        for (Solid solid: parts) {
+            solid.release();
+        }
+    }
+
 }
