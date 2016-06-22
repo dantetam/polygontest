@@ -35,19 +35,19 @@ public abstract class RenderEntity {
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
         cubePositionsBuffer.put(cubePositions).position(0);
 
-        cubeNormalsBuffer = ByteBuffer.allocateDirect(cubeNormals.length * BYTES_PER_FLOAT * generatedCubeFactor * generatedCubeFactor * generatedCubeFactor)
+        cubeNormalsBuffer = ByteBuffer.allocateDirect(cubeNormals.length * BYTES_PER_FLOAT * generatedCubeFactor * generatedCubeFactor)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
 
-        for (int i = 0; i < (generatedCubeFactor * generatedCubeFactor * generatedCubeFactor); i++) {
+        for (int i = 0; i < (generatedCubeFactor * generatedCubeFactor); i++) {
             cubeNormalsBuffer.put(cubeNormals);
         }
 
         cubeNormalsBuffer.position(0);
 
-        cubeTextureCoordinatesBuffer = ByteBuffer.allocateDirect(cubeTextureCoordinates.length * BYTES_PER_FLOAT * generatedCubeFactor * generatedCubeFactor * generatedCubeFactor)
+        cubeTextureCoordinatesBuffer = ByteBuffer.allocateDirect(cubeTextureCoordinates.length * BYTES_PER_FLOAT * generatedCubeFactor * generatedCubeFactor)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
 
-        for (int i = 0; i < (generatedCubeFactor * generatedCubeFactor * generatedCubeFactor); i++) {
+        for (int i = 0; i < (generatedCubeFactor * generatedCubeFactor); i++) {
             cubeTextureCoordinatesBuffer.put(cubeTextureCoordinates);
         }
 
@@ -58,8 +58,8 @@ public abstract class RenderEntity {
 
     FloatBuffer getInterleavedBuffer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
         final int cubeDataLength = cubePositions.length
-                + (cubeNormals.length * generatedCubeFactor * generatedCubeFactor * generatedCubeFactor)
-                + (cubeTextureCoordinates.length * generatedCubeFactor * generatedCubeFactor * generatedCubeFactor);
+                + (cubeNormals.length * generatedCubeFactor * generatedCubeFactor)
+                + (cubeTextureCoordinates.length * generatedCubeFactor * generatedCubeFactor);
         int cubePositionOffset = 0;
         int cubeNormalOffset = 0;
         int cubeTextureOffset = 0;
@@ -67,7 +67,7 @@ public abstract class RenderEntity {
         final FloatBuffer cubeBuffer = ByteBuffer.allocateDirect(cubeDataLength * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
 
-        for (int i = 0; i < generatedCubeFactor * generatedCubeFactor * generatedCubeFactor; i++) {
+        for (int i = 0; i < generatedCubeFactor * generatedCubeFactor; i++) {
             for (int v = 0; v < 36; v++) {
                 cubeBuffer.put(cubePositions, cubePositionOffset, POSITION_DATA_SIZE);
                 cubePositionOffset += POSITION_DATA_SIZE;

@@ -225,7 +225,7 @@ public class Solid extends RenderEntity {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Draw the cubes.
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, generatedCubeFactor * generatedCubeFactor * generatedCubeFactor * 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, generatedCubeFactor * generatedCubeFactor * 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
     }
 
     public void render(int blockIndex) {

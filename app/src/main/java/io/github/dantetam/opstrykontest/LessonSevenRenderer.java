@@ -15,6 +15,9 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
+import io.github.dantetam.world.Tile;
+import io.github.dantetam.world.World;
+
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
  * passed in is unused for OpenGL ES 2.0 renderers -- the static class GLES20 is
@@ -118,12 +121,20 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
 	public Camera camera;
 
+    public World world;
+    public WorldGenerator worldGenerator;
+    public static final int WORLD_LENGTH = 33;
+
 	/**
 	 * Initialize the model data.
 	 */
 	public LessonSevenRenderer(final LessonSevenActivity lessonSevenActivity, final GLSurfaceView glSurfaceView) {
 		mLessonSevenActivity = lessonSevenActivity;	
 		mGlSurfaceView = glSurfaceView;
+
+        world = new World(WORLD_LENGTH, WORLD_LENGTH);
+        worldGenerator = new WorldGenerator(world);
+        worldGenerator.init();
 	}
 
 	private void generateCubes(int cubeFactor) {
@@ -251,25 +262,29 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 						1.0f, 0.0f
 				};
 
-				final float[] cubePositionData = new float[108 * mRequestedCubeFactor * mRequestedCubeFactor * mRequestedCubeFactor];
+				final float[] cubePositionData = new float[108 * mRequestedCubeFactor * mRequestedCubeFactor];
 				int cubePositionDataOffset = 0;
 
 				final int segments = mRequestedCubeFactor + (mRequestedCubeFactor - 1);
-				final float minPosition = -1.0f;
-				final float maxPosition = 1.0f;
-				final float positionRange = maxPosition - minPosition;
+                //final int segments = mRequestedCubeFactor - 1;
+
+                final float minPosition = -mRequestedCubeFactor;
+                final float maxPosition = mRequestedCubeFactor;
+                final float positionRange = maxPosition - minPosition;
 
 				for (int x = 0; x < mRequestedCubeFactor; x++) {
-					for (int y = 0; y < mRequestedCubeFactor; y++) {
+					//for (int y = 0; y < mRequestedCubeFactor; y++) {
 						for (int z = 0; z < mRequestedCubeFactor; z++) {
-							final float x1 = minPosition + ((positionRange / segments) * (x * 2));
-							final float x2 = minPosition + ((positionRange / segments) * ((x * 2) + 1));
+                            Tile tile = world.getTile(x,z);
 
-							final float y1 = minPosition + ((positionRange / segments) * (y * 2));
-							final float y2 = minPosition + ((positionRange / segments) * ((y * 2) + 1));
+							final float x1 = minPosition + ((positionRange / segments) * (x * 2));
+							final float x2 = minPosition + ((positionRange / segments) * ((x * 2) + 2));
+
+							final float y1 = minPosition + ((positionRange / segments) * (1 * 2));
+							final float y2 = minPosition + ((positionRange / segments) * ((1 * 2) + 1)) + tile.elevation;
 
 							final float z1 = minPosition + ((positionRange / segments) * (z * 2));
-							final float z2 = minPosition + ((positionRange / segments) * ((z * 2) + 1));
+							final float z2 = minPosition + ((positionRange / segments) * ((z * 2) + 2));
 
 							// Define points for a cube.
 							// X, Y, Z
@@ -288,7 +303,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 							System.arraycopy(thisCubePositionData, 0, cubePositionData, cubePositionDataOffset, thisCubePositionData.length);
 							cubePositionDataOffset += thisCubePositionData.length;
 						}
-					}
+					//}
 				}
 				
 				// Run on the GL thread -- the same thread the other members of the renderer run in.
@@ -305,11 +320,12 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 						
 						try {
 							mCubes = new Model();
-							for (int i = 0; i < mActualCubeFactor * mActualCubeFactor * mActualCubeFactor; i++) {
-								mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, 1));
-							}
-							
-							mActualCubeFactor = mRequestedCubeFactor;
+							//for (int i = 0; i < mRequestedCubeFactor * mRequestedCubeFactor * mRequestedCubeFactor; i++) {
+								//mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, 1));
+							//}
+                            mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor));
+
+                            mActualCubeFactor = mRequestedCubeFactor;
 						} catch (OutOfMemoryError err) {
 							if (mCubes != null) {
 								mCubes.release();
@@ -357,9 +373,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
 	{
-		mCubes = new Model();
+		//mCubes = new Model();
 
-		mLastRequestedCubeFactor = mActualCubeFactor = 3;
+		mLastRequestedCubeFactor = mActualCubeFactor = WORLD_LENGTH;
 		generateCubes(mActualCubeFactor);
 		
 		// Set the background clear color to black.
@@ -450,11 +466,16 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		//GLES20.glClearColor(0f/255f, 140f/255f, 255f/255f, 255f/255f);
 		mViewMatrix = camera.getViewMatrix();
 
-		for (int i = 0; i < mCubes.parts.size(); i++) {
-			Solid solid = mCubes.parts.get(i);
-			int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
-			int y = (i / mActualCubeFactor) % mActualCubeFactor;
-			int z = i % mActualCubeFactor;
+		//for (int i = 0; i < mCubes.parts.size(); i++) {
+        if (mCubes == null || mCubes.parts.size() == 0) {
+            generateCubes(mActualCubeFactor);
+            return;
+        }
+        //System.out.println(mCubes + " <<<");
+			Solid solid = mCubes.parts.get(0);
+			//int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
+			//int y = (i / mActualCubeFactor) % mActualCubeFactor;
+			//int z = i % mActualCubeFactor;
 			// Set our per-vertex lighting program.
 			GLES20.glUseProgram(mProgramHandle);
 
@@ -477,7 +498,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			// Draw a cube.
 			// Translate the cube into the screen.
 			Matrix.setIdentityM(mModelMatrix, 0);
-			Matrix.translateM(mModelMatrix, 0, x, y, z);
+            Matrix.translateM(mModelMatrix, 0, 4f, 2f, 2f);
+			//Matrix.translateM(mModelMatrix, 0, x, y*2, z);
 
 			// Set a matrix that contains the current rotation.
 			Matrix.setIdentityM(mCurrentRotation, 0);
@@ -497,7 +519,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			// This multiplies the view matrix by the model matrix, and stores
 			// the result in the MVP matrix
 			// (which currently contains model * view).
-			Matrix.scaleM(mModelMatrix, 0, x/3f, 1, 1);
+			Matrix.scaleM(mModelMatrix, 0, 1, 1, 1);
 
 			Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
@@ -530,7 +552,6 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 			if (mCubes != null) {
 				mCubes.parts.get(0).renderAll();
 			}
-		}
 	}
 
 }
