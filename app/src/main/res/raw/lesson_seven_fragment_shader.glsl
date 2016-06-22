@@ -6,6 +6,7 @@ uniform sampler2D u_Texture;    // The input texture.
 varying vec3 v_Position;		// Interpolated position for this fragment.
 varying vec3 v_Normal;         	// Interpolated normal for this fragment.
 varying vec2 v_TexCoordinate;   // Interpolated texture coordinate per fragment.
+//varying vec4 v_Color;
   
 // The entry point for our fragment shader.
 void main()                    		
@@ -28,6 +29,8 @@ void main()
 
 	// Multiply the color by the diffuse illumination level and texture value to get final output color.
     //gl_FragColor = (diffuse * texture2D(u_Texture, v_TexCoordinate));
-    gl_FragColor = vec4(diffuse, diffuse, diffuse, 1.0);
+    vec4 gl_FragColor = vec4(diffuse, diffuse, diffuse, 1.0);
+
+    //gl_FragColor = mix(diffuse, gray, 0.5);
   }                                                                     	
 
