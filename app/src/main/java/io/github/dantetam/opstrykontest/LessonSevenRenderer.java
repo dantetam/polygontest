@@ -323,7 +323,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 							//for (int i = 0; i < mRequestedCubeFactor * mRequestedCubeFactor * mRequestedCubeFactor; i++) {
 								//mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, 1));
 							//}
-                            mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor));
+                            //mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor));
+                            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
 
                             mActualCubeFactor = mRequestedCubeFactor;
 						} catch (OutOfMemoryError err) {
@@ -403,8 +404,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		final float upZ = 0.0f;*/
 
 		camera = new Camera();
-		camera.moveTo(4f, 4f, 4f);
-		camera.pointTo(4f, 2f, 2f);
+		camera.moveTo(6f, 6f, 6f);
+		camera.pointTo(6f, 1f, 1f);
 		// Set the view matrix. This matrix can be said to represent the camera position.
 		// NOTE: In OpenGL 1, a ModelView matrix is used, which is a combination of a model and
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
@@ -470,88 +471,93 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
         if (mCubes == null || mCubes.parts.size() == 0) {
             generateCubes(mActualCubeFactor);
             return;
+            /*mCubes = new Model();
+            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
+            System.out.println("Render1");
+            return;*/
         }
-        //System.out.println(mCubes + " <<<");
-			Solid solid = mCubes.parts.get(0);
-			//int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
-			//int y = (i / mActualCubeFactor) % mActualCubeFactor;
-			//int z = i % mActualCubeFactor;
-			// Set our per-vertex lighting program.
-			GLES20.glUseProgram(mProgramHandle);
+        for (int i = 0; i < mCubes.parts.size(); i++) {
+            Solid solid = mCubes.parts.get(i);
+            //int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
+            //int y = (i / mActualCubeFactor) % mActualCubeFactor;
+            //int z = i % mActualCubeFactor;
+            // Set our per-vertex lighting program.
+            GLES20.glUseProgram(mProgramHandle);
 
-			// Set program handles for cube drawing.
-			mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVPMatrix");
-			mMVMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVMatrix");
-			mLightPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_LightPos");
-			mTextureUniformHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_Texture");
-			solid.mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");
-			solid.mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal");
-			solid.mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
+            // Set program handles for cube drawing.
+            mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVPMatrix");
+            mMVMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVMatrix");
+            mLightPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_LightPos");
+            mTextureUniformHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_Texture");
+            solid.mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");
+            solid.mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal");
+            solid.mTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
 
-			// Calculate position of the light. Push into the distance.
-			Matrix.setIdentityM(mLightModelMatrix, 0);
-			Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -1.0f);
+            // Calculate position of the light. Push into the distance.
+            Matrix.setIdentityM(mLightModelMatrix, 0);
+            Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -1.0f);
 
-			Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
-			Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);
+            Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
+            Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);
 
-			// Draw a cube.
-			// Translate the cube into the screen.
-			Matrix.setIdentityM(mModelMatrix, 0);
-            Matrix.translateM(mModelMatrix, 0, 4f, 2f, 2f);
-			//Matrix.translateM(mModelMatrix, 0, x, y*2, z);
+            // Draw a cube.
+            // Translate the cube into the screen.
+            Matrix.setIdentityM(mModelMatrix, 0);
+            Matrix.translateM(mModelMatrix, 0, 0f, 0f, 0f);
+            //Matrix.translateM(mModelMatrix, 0, x, y*2, z);
 
-			// Set a matrix that contains the current rotation.
-			Matrix.setIdentityM(mCurrentRotation, 0);
-			//Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
-			//Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
-			mDeltaX = 0.0f;
-			mDeltaY = 0.0f;
+            // Set a matrix that contains the current rotation.
+            Matrix.setIdentityM(mCurrentRotation, 0);
+            //Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
+            //Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
+            mDeltaX = 0.0f;
+            mDeltaY = 0.0f;
 
-			// Multiply the current rotation by the accumulated rotation, and then set the accumulated rotation to the result.
-			Matrix.multiplyMM(mTemporaryMatrix, 0, mCurrentRotation, 0, mAccumulatedRotation, 0);
-			System.arraycopy(mTemporaryMatrix, 0, mAccumulatedRotation, 0, 16);
+            // Multiply the current rotation by the accumulated rotation, and then set the accumulated rotation to the result.
+            Matrix.multiplyMM(mTemporaryMatrix, 0, mCurrentRotation, 0, mAccumulatedRotation, 0);
+            System.arraycopy(mTemporaryMatrix, 0, mAccumulatedRotation, 0, 16);
 
-			// Rotate the cube taking the overall rotation into account.
-			Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
-			System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);
+            // Rotate the cube taking the overall rotation into account.
+            Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
+            System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);
 
-			// This multiplies the view matrix by the model matrix, and stores
-			// the result in the MVP matrix
-			// (which currently contains model * view).
-			Matrix.scaleM(mModelMatrix, 0, 1, 1, 1);
+            // This multiplies the view matrix by the model matrix, and stores
+            // the result in the MVP matrix
+            // (which currently contains model * view).
+            Matrix.scaleM(mModelMatrix, 0, 1f, 1f, 1f);
 
-			Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
+            Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
 
-			// Pass in the modelview matrix.
-			GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mMVPMatrix, 0);
+            // Pass in the modelview matrix.
+            GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mMVPMatrix, 0);
 
-			// This multiplies the modelview matrix by the projection matrix,
-			// and stores the result in the MVP matrix
-			// (which now contains model * view * projection).
-			Matrix.multiplyMM(mTemporaryMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-			System.arraycopy(mTemporaryMatrix, 0, mMVPMatrix, 0, 16);
+            // This multiplies the modelview matrix by the projection matrix,
+            // and stores the result in the MVP matrix
+            // (which now contains model * view * projection).
+            Matrix.multiplyMM(mTemporaryMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+            System.arraycopy(mTemporaryMatrix, 0, mMVPMatrix, 0, 16);
 
-			// Pass in the combined matrix.
-			GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
+            // Pass in the combined matrix.
+            GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
 
-			// Pass in the light position in eye space.
-			GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
+            // Pass in the light position in eye space.
+            GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
 
-			// Pass in the texture information
-			// Set the active texture unit to texture unit 0.
-			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            // Pass in the texture information
+            // Set the active texture unit to texture unit 0.
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-			// Bind the texture to this unit.
-			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);
+            // Bind the texture to this unit.
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);
 
-			// Tell the texture uniform sampler to use this texture in the
-			// shader by binding to texture unit 0.
-			GLES20.glUniform1i(mTextureUniformHandle, 0);
+            // Tell the texture uniform sampler to use this texture in the
+            // shader by binding to texture unit 0.
+            GLES20.glUniform1i(mTextureUniformHandle, 0);
 
-			if (mCubes != null) {
-				mCubes.parts.get(0).renderAll();
-			}
+            if (mCubes != null) {
+                mCubes.parts.get(i).renderAll();
+            }
+        }
 	}
 
 }

@@ -56,6 +56,34 @@ public abstract class RenderEntity {
         return new FloatBuffer[] {cubePositionsBuffer, cubeNormalsBuffer, cubeTextureCoordinatesBuffer};
     }
 
+    FloatBuffer getInterleavedBuffer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates) {
+        final int cubeDataLength = cubePositions.length
+                + (cubeNormals.length)
+                + (cubeTextureCoordinates.length);
+        int cubePositionOffset = 0;
+        int cubeNormalOffset = 0;
+        int cubeTextureOffset = 0;
+
+        final FloatBuffer cubeBuffer = ByteBuffer.allocateDirect(cubeDataLength * BYTES_PER_FLOAT)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+
+        for (int v = 0; v < cubePositions.length / POSITION_DATA_SIZE; v++) {
+            //float[] result = new float[cubeBuffer.limit()];
+            //cubeBuffer.get(result);
+            //System.out.println(">>> " + cubePositions.length + " " + cubePositionOffset + " " + cubeDataLength);
+            cubeBuffer.put(cubePositions, cubePositionOffset, POSITION_DATA_SIZE);
+            cubePositionOffset += POSITION_DATA_SIZE;
+            cubeBuffer.put(cubeNormals, cubeNormalOffset, NORMAL_DATA_SIZE);
+            cubeNormalOffset += NORMAL_DATA_SIZE;
+            cubeBuffer.put(cubeTextureCoordinates, cubeTextureOffset, TEXTURE_COORDINATE_DATA_SIZE);
+            cubeTextureOffset += TEXTURE_COORDINATE_DATA_SIZE;
+        }
+
+        cubeBuffer.position(0);
+
+        return cubeBuffer;
+    }
+
     FloatBuffer getInterleavedBuffer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
         final int cubeDataLength = cubePositions.length
                 + (cubeNormals.length * generatedCubeFactor * generatedCubeFactor)
@@ -68,7 +96,10 @@ public abstract class RenderEntity {
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
 
         for (int i = 0; i < generatedCubeFactor * generatedCubeFactor; i++) {
-            for (int v = 0; v < 36; v++) {
+            for (int v = 0; v < cubePositions.length / POSITION_DATA_SIZE; v++) {
+                //float[] result = new float[cubeBuffer.limit()];
+                //cubeBuffer.get(result);
+                //System.out.println(">>> " + cubePositions.length + " " + cubePositionOffset + " " + cubeDataLength);
                 cubeBuffer.put(cubePositions, cubePositionOffset, POSITION_DATA_SIZE);
                 cubePositionOffset += POSITION_DATA_SIZE;
                 cubeBuffer.put(cubeNormals, cubeNormalOffset, NORMAL_DATA_SIZE);

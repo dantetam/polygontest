@@ -187,6 +187,8 @@ public class Solid extends RenderEntity {
         FloatBuffer cubeBuffer = getInterleavedBuffer(cubePositions, cubeNormals, cubeTextureCoordinates, cubeFactor);
         generatedCubeFactor = cubeFactor;
 
+        numVerticesToRender = generatedCubeFactor * generatedCubeFactor * 36;
+
         // Second, copy these buffers into OpenGL's memory. After, we don't need to keep the client-side buffers around.
         final int buffers[] = new int[1];
         GLES20.glGenBuffers(1, buffers, 0);
@@ -202,6 +204,7 @@ public class Solid extends RenderEntity {
         cubeBuffer = null;
     }
 
+    public int numVerticesToRender;
     public void renderAll() {
         final int stride = (POSITION_DATA_SIZE + NORMAL_DATA_SIZE + TEXTURE_COORDINATE_DATA_SIZE) * BYTES_PER_FLOAT;
 
@@ -225,7 +228,7 @@ public class Solid extends RenderEntity {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Draw the cubes.
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, generatedCubeFactor * generatedCubeFactor * 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, numVerticesToRender); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
     }
 
     public void render(int blockIndex) {

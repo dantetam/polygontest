@@ -3,10 +3,14 @@ package io.github.dantetam.opstrykontest;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-public class LessonSevenGLSurfaceView extends GLSurfaceView 
-{	
+public class LessonSevenGLSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener
+
+        {
 	private LessonSevenRenderer mRenderer;
 	
 	// Offsets for touch events	 
@@ -58,7 +62,11 @@ public class LessonSevenGLSurfaceView extends GLSurfaceView
 		}		
 	}
 
-	// Hides superclass method.
+    public final String DEBUG_TAG = "Debug (Gesture): ";
+
+
+
+    // Hides superclass method.
 	public void setRenderer(LessonSevenRenderer renderer, float density) 
 	{
 		mRenderer = renderer;

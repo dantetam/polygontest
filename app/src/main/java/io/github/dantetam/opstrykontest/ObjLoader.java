@@ -13,6 +13,15 @@ import java.util.ArrayList;
 
 public class ObjLoader {
 
+    public static Solid loadSolid(final Context context,
+                                  final int resourceId)
+    {
+        float[][] data = loadObjModel(context, resourceId);
+        Solid solid = new Solid(data[0], data[1], data[2], 1);
+        solid.numVerticesToRender = data[0].length;
+        return solid;
+    }
+
     public static float[][] loadObjModel(final Context context,
         final int resourceId)
     {
