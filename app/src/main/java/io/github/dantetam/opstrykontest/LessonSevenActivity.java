@@ -5,17 +5,25 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-public class LessonSevenActivity extends Activity {
+public class LessonSevenActivity extends Activity implements
+        GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener
+{
 	/** Hold a reference to our GLSurfaceView */
 	private LessonSevenGLSurfaceView mGLSurfaceView;
 	private LessonSevenRenderer mRenderer;
 
-	@Override
+    private GestureDetectorCompat mDetector;
+
+    @Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -61,7 +69,9 @@ public class LessonSevenActivity extends Activity {
 		//findViewById(R.id.button_switch_VBOs).setOnClickListener
 		
 		//findViewById(R.id.button_switch_stride).setOnClickListener
-	}
+        mDetector = new GestureDetectorCompat(this,this);
+        mDetector.setOnDoubleTapListener(this);
+    }
 
 	@Override
 	protected void onResume() {
@@ -96,5 +106,61 @@ public class LessonSevenActivity extends Activity {
 			}
 		});
 	}
+
+    public final String DEBUG_TAG = "Debug (Gesture): ";
+
+    @Override
+    public boolean onDown(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onDown: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onFling(MotionEvent event1, MotionEvent event2,
+                           float velocityX, float velocityY) {
+        System.out.println(DEBUG_TAG + "; onFling: " + event1.toString() + event2.toString());
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onLongPress: " + event.toString());
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                            float distanceY) {
+        System.out.println(DEBUG_TAG + "; onScroll: " + e1.toString() + e2.toString());
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onShowPress: " + event.toString());
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onSingleTapUp: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onDoubleTap: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onDoubleTapEvent: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onSingleTapConfirmed: " + event.toString());
+        return true;
+    }
 
 }

@@ -18,12 +18,131 @@ public class ObjLoader {
     {
         float[][] data = loadObjModel(context, resourceId);
         Solid solid = new Solid(data[0], data[1], data[2], 1);
+        for (int t = 0; t < 3; t++) {
+            for (int i = 0; i < data[t].length; i++) {
+                System.out.print(data[t][i] + " ");
+                int f = t == 2 ? 2 : 3;
+                if (i % f == f - 1) {
+                    System.out.print("; ");
+                }
+            }
+            System.out.println();
+        }
+        /*for (int i = 0; i < data[1].length; i++) {
+            System.out.print(data[1][i] + " ");
+        }
+        System.out.println();
+        for (int i = 0; i < data[2].length; i++) {
+            System.out.print(data[2][i] + " ");
+        }
+        System.out.println();*/
         solid.numVerticesToRender = data[0].length;
         return solid;
     }
 
-    public static float[][] loadObjModel(final Context context,
+    public static float[][] loadObjModelByIndex(final Context context,
         final int resourceId)
+    {
+        final InputStream inputStream = context.getResources().openRawResource(
+                resourceId);
+        final InputStreamReader inputStreamReader = new InputStreamReader(
+                inputStream);
+        final BufferedReader bufferedReader = new BufferedReader(
+                inputStreamReader);
+
+        String nextLine;
+        final StringBuilder body = new StringBuilder();
+
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        String line;
+        ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
+        ArrayList<Vector2f> textures = new ArrayList<Vector2f>();
+        ArrayList<Vector3f> normals = new ArrayList<Vector3f>();
+        ArrayList<Integer> indices = new ArrayList<Integer>();
+        float[] verticesArray, normalsArray = null, textureArray = null;
+        int[] indicesArray;
+        try
+        {
+            while (true)
+            {
+                line = reader.readLine();
+                String[] currentLine = line.split(" ");
+                if (line.startsWith("v ")) //vertex position
+                {
+                    Vector3f vertex = new Vector3f(
+                            Float.parseFloat(currentLine[1]),
+                            Float.parseFloat(currentLine[2]),
+                            Float.parseFloat(currentLine[3])
+                    );
+                    vertices.add(vertex);
+                }
+                else if (line.startsWith("vt ")) //texture coordinate
+                {
+                    Vector2f texture = new Vector2f(
+                            Float.parseFloat(currentLine[1]),
+                            Float.parseFloat(currentLine[2])
+                    );
+                    textures.add(texture);
+                }
+                else if (line.startsWith("vn ")) //normal
+                {
+                    Vector3f vertex = new Vector3f(
+                            Float.parseFloat(currentLine[1]),
+                            Float.parseFloat(currentLine[2]),
+                            Float.parseFloat(currentLine[3])
+                    );
+                    normals.add(vertex);
+                }
+                else if (line.startsWith("f ")) //face object
+                {
+                    //All the v, vt, vn lines have been passed, end the loop
+                    textureArray = new float[vertices.size()*2];
+                    normalsArray = new float[vertices.size()*3];
+                    break;
+                }
+            }
+
+            while (line != null)
+            {
+                //Make sure a face line is being read
+                if (!line.startsWith("f "))
+                {
+                    line = reader.readLine();
+                    continue;
+                }
+                //A face is in the from f x/y/z a/b/c d/e/f
+                //Split into these 4 sections
+                //and then split the sections by slashes to get the numbers x, y, z, etc.
+                String[] currentLine = line.split(" ");
+                String[] vertex1 = currentLine[1].split("/");
+                String[] vertex2 = currentLine[2].split("/");
+                String[] vertex3 = currentLine[3].split("/");
+
+                processVertex(vertex1,indices,textures,normals,textureArray,normalsArray);
+                processVertex(vertex2,indices,textures,normals,textureArray,normalsArray);
+                processVertex(vertex3,indices,textures,normals,textureArray,normalsArray);
+                line = reader.readLine();
+            }
+            reader.close();
+
+        } catch(Exception e) {e.printStackTrace();}
+
+        verticesArray = new float[vertices.size()*3]; //Convert lists to array
+        indicesArray = new int[indices.size()];
+        int vertexPointer = 0;
+        for (Vector3f vertex : vertices) {
+            verticesArray[vertexPointer++] = vertex.x;
+            verticesArray[vertexPointer++] = vertex.y;
+            verticesArray[vertexPointer++] = vertex.z;
+        }
+        for (int i = 0; i < indices.size(); i++) {
+            indicesArray[i] = indices.get(i);
+        }
+        return new float[][]{verticesArray, normalsArray, textureArray};
+    }
+
+    public static float[][] loadObjModelByVertex(final Context context,
+                                                final int resourceId)
     {
         final InputStream inputStream = context.getResources().openRawResource(
                 resourceId);

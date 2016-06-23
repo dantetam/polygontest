@@ -324,7 +324,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 								//mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, 1));
 							//}
                             //mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor));
-                            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
+                            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.cube));
 
                             mActualCubeFactor = mRequestedCubeFactor;
 						} catch (OutOfMemoryError err) {
@@ -383,7 +383,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		
 		// Use culling to remove back faces.
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		//TODO: GLES20.glEnable(GLES20.GL_CULL_FACE);
 		
 		// Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);						
@@ -404,8 +404,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		final float upZ = 0.0f;*/
 
 		camera = new Camera();
-		camera.moveTo(6f, 6f, 6f);
-		camera.pointTo(6f, 1f, 1f);
+		camera.moveTo(3f, 6f, 6f);
+		camera.pointTo(3f, 3f, 3f);
 		// Set the view matrix. This matrix can be said to represent the camera position.
 		// NOTE: In OpenGL 1, a ModelView matrix is used, which is a combination of a model and
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
@@ -508,8 +508,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
             // Set a matrix that contains the current rotation.
             Matrix.setIdentityM(mCurrentRotation, 0);
-            //Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
-            //Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
+            Matrix.rotateM(mCurrentRotation, 0, mDeltaX, 0.0f, 1.0f, 0.0f);
+            Matrix.rotateM(mCurrentRotation, 0, mDeltaY, 1.0f, 0.0f, 0.0f);
             mDeltaX = 0.0f;
             mDeltaY = 0.0f;
 

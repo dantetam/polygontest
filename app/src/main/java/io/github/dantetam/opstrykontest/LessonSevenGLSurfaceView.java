@@ -7,9 +7,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
-public class LessonSevenGLSurfaceView extends GLSurfaceView implements GestureDetector.OnGestureListener,
-        GestureDetector.OnDoubleTapListener
-
+public class LessonSevenGLSurfaceView extends GLSurfaceView
         {
 	private LessonSevenRenderer mRenderer;
 	
@@ -44,10 +42,10 @@ public class LessonSevenGLSurfaceView extends GLSurfaceView implements GestureDe
 					float deltaX = (x - mPreviousX) / mDensity / 2f;
 					float deltaY = (y - mPreviousY) / mDensity / 2f;
 					
-					//mRenderer.mDeltaX += deltaX;
-					//mRenderer.mDeltaY += deltaY;
-					mRenderer.camera.moveShift(-deltaX/10, 0, -deltaY/10);
-					mRenderer.camera.pointShift(-deltaX/10, 0, -deltaY/10);
+					mRenderer.mDeltaX += deltaX;
+					mRenderer.mDeltaY += deltaY;
+					//mRenderer.camera.moveShift(-deltaX/10, 0, -deltaY/10);
+					//0mRenderer.camera.pointShift(-deltaX/10, 0, -deltaY/10);
 				}
 			}	
 			
@@ -61,62 +59,6 @@ public class LessonSevenGLSurfaceView extends GLSurfaceView implements GestureDe
 			return super.onTouchEvent(event);
 		}		
 	}
-
-    public final String DEBUG_TAG = "Debug (Gesture): ";
-
-    @Override
-    public boolean onDown(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onDown: " + event.toString());
-        return true;
-    }
-
-    @Override
-    public boolean onFling(MotionEvent event1, MotionEvent event2,
-                           float velocityX, float velocityY) {
-        System.out.println(DEBUG_TAG + "; onFling: " + event1.toString() + event2.toString());
-        return true;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onLongPress: " + event.toString());
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-                            float distanceY) {
-        System.out.println(DEBUG_TAG + "; onScroll: " + e1.toString() + e2.toString());
-        return true;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onShowPress: " + event.toString());
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onSingleTapUp: " + event.toString());
-        return true;
-    }
-
-    @Override
-    public boolean onDoubleTap(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onDoubleTap: " + event.toString());
-        return true;
-    }
-
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onDoubleTapEvent: " + event.toString());
-        return true;
-    }
-
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent event) {
-        System.out.println(DEBUG_TAG + "; onSingleTapConfirmed: " + event.toString());
-        return true;
-    }
 
     // Hides superclass method.
 	public void setRenderer(LessonSevenRenderer renderer, float density) 
