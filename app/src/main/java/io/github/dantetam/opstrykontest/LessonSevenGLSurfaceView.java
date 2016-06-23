@@ -64,7 +64,59 @@ public class LessonSevenGLSurfaceView extends GLSurfaceView implements GestureDe
 
     public final String DEBUG_TAG = "Debug (Gesture): ";
 
+    @Override
+    public boolean onDown(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onDown: " + event.toString());
+        return true;
+    }
 
+    @Override
+    public boolean onFling(MotionEvent event1, MotionEvent event2,
+                           float velocityX, float velocityY) {
+        System.out.println(DEBUG_TAG + "; onFling: " + event1.toString() + event2.toString());
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onLongPress: " + event.toString());
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                            float distanceY) {
+        System.out.println(DEBUG_TAG + "; onScroll: " + e1.toString() + e2.toString());
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onShowPress: " + event.toString());
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onSingleTapUp: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onDoubleTap: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onDoubleTapEvent: " + event.toString());
+        return true;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent event) {
+        System.out.println(DEBUG_TAG + "; onSingleTapConfirmed: " + event.toString());
+        return true;
+    }
 
     // Hides superclass method.
 	public void setRenderer(LessonSevenRenderer renderer, float density) 
