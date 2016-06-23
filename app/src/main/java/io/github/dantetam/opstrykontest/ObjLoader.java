@@ -144,12 +144,9 @@ public class ObjLoader {
     public static float[][] loadObjModelByVertex(final Context context,
                                                 final int resourceId)
     {
-        final InputStream inputStream = context.getResources().openRawResource(
-                resourceId);
-        final InputStreamReader inputStreamReader = new InputStreamReader(
-                inputStream);
-        final BufferedReader bufferedReader = new BufferedReader(
-                inputStreamReader);
+        final InputStream inputStream = context.getResources().openRawResource(resourceId);
+        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         String nextLine;
         final StringBuilder body = new StringBuilder();
@@ -225,9 +222,6 @@ public class ObjLoader {
                 processVertex(vertex2, vertices, textures, normals, allVertices, allTextures, allNormals);
                 processVertex(vertex3, vertices, textures, normals, allVertices, allTextures, allNormals);
 
-                //processVertex(vertex1,indices,textures,normals,textureArray,normalsArray);
-                //processVertex(vertex2,indices,textures,normals,textureArray,normalsArray);
-                //processVertex(vertex3,indices,textures,normals,textureArray,normalsArray);
                 line = reader.readLine();
             }
             reader.close();
@@ -237,6 +231,9 @@ public class ObjLoader {
         float[] verticesArray = new float[allVertices.size() * 3];
         float[] textureArray = new float[allVertices.size() * 2];
         float[] normalsArray = new float[allVertices.size() * 3];
+
+        System.out.println(">>> " + vertices.size() + " " + textures.size() + " " + normals.size());
+        System.out.println(">>> " + allVertices.size() + " " + allTextures.size() + " " + allNormals.size());
 
         for (int i = 0; i < allVertices.size(); i++) {
             Vector3f v = allVertices.get(i);
@@ -253,17 +250,7 @@ public class ObjLoader {
             normalsArray[i*3 + 1] = n.y;
             normalsArray[i*3 + 2] = n.z;
         }
-        /*verticesArray = new float[vertices.size()*3]; //Convert lists to array
-        indicesArray = new int[indices.size()];
-        int vertexPointer = 0;
-        for (Vector3f vertex : vertices) {
-            verticesArray[vertexPointer++] = vertex.x;
-            verticesArray[vertexPointer++] = vertex.y;
-            verticesArray[vertexPointer++] = vertex.z;
-        }
-        for (int i = 0; i < indices.size(); i++) {
-            indicesArray[i] = indices.get(i);
-        }*/
+
         return new float[][]{verticesArray, normalsArray, textureArray};
     }
 
@@ -275,9 +262,9 @@ public class ObjLoader {
             ArrayList<Vector3f> allVertices,
             ArrayList<Vector2f> allTextures,
             ArrayList<Vector3f> allNormals) {
-        allVertices.add(vertices.get(Integer.parseInt(vertex[1]) - 1));
-        allTextures.add(textures.get(Integer.parseInt(vertex[2]) - 1));
-        allNormals.add(normals.get(Integer.parseInt(vertex[3]) - 1));
+        allVertices.add(vertices.get(Integer.parseInt(vertex[0]) - 1));
+        allTextures.add(textures.get(Integer.parseInt(vertex[1]) - 1));
+        allNormals.add(normals.get(Integer.parseInt(vertex[2]) - 1));
     }
 
     private static void processVertex(

@@ -324,7 +324,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 								//mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, 1));
 							//}
                             //mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor));
-                            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.cube));
+                            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
 
                             mActualCubeFactor = mRequestedCubeFactor;
 						} catch (OutOfMemoryError err) {
