@@ -18,7 +18,7 @@ public class ObjLoader {
     {
         float[][] data = loadObjModelByVertex(context, resourceId);
         Solid solid = new Solid(data[0], data[1], data[2], 1);
-        for (int t = 0; t < 3; t++) {
+        /*for (int t = 0; t < 3; t++) {
             for (int i = 0; i < data[t].length; i++) {
                 System.out.print(data[t][i] + " ");
                 int f = t == 2 ? 2 : 3;
@@ -27,15 +27,7 @@ public class ObjLoader {
                 }
             }
             System.out.println();
-        }
-        /*for (int i = 0; i < data[1].length; i++) {
-            System.out.print(data[1][i] + " ");
-        }
-        System.out.println();
-        for (int i = 0; i < data[2].length; i++) {
-            System.out.print(data[2][i] + " ");
-        }
-        System.out.println();*/
+        }*/
         solid.numVerticesToRender = data[0].length;
         return solid;
     }
