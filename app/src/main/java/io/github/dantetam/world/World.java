@@ -9,13 +9,19 @@ public class World {
 
     //private QuadTree<Tile, int[]> tiles;
     //private WorldTree tree;
-    protected Tile[][] tiles;
-    public int rows, cols;
+    protected Tile[][] hexes;
+    public int totalX, totalZ;
 
-    public World(int totalRows, int totalCols) {
+    //x represents height, z represents length
+    public World(int totalX, int totalZ) {
         //tree = new WorldTree();
-        tiles = new Tile[totalRows][totalCols];
-        rows = totalRows; cols = totalCols;
+        hexes = new Tile[totalX][];
+        this.totalX = totalX; this.totalZ = totalZ;
+        for (int x = 0; x < totalX; x++) {
+            int len = x % 2 == 0 ? totalZ : totalZ - 1;
+            hexes[x] = new Tile[len];
+
+        }
     }
 
     public void init(int[][] biomes, int[][] terrain, Tile.Resource[][] resources, int[][] elevations) {

@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class Tile extends Representable {
 
-    public int row, col;
+    public int x, y, z;
     public int elevation;
     public Biome biome; //combined climate of land
     public Terrain terrain; //shape of the land
@@ -81,8 +81,8 @@ public class Tile extends Representable {
         }
     }
 
-    public Tile(int r, int c) {
-        row = r; col = c;
+    public Tile(int a, int b, int c) {
+        x = a; y = b; z = c;
         resources = new ArrayList<Resource>();
     }
 
@@ -103,7 +103,7 @@ public class Tile extends Representable {
             return false;
         }
         Tile t = (Tile) a;
-        return row == t.row && col == t.col;
+        return x == t.x && y == t.y && z == t.z;
     }
 
     public int compareX(Tile a, Tile b) {return a.row - b.row;}
