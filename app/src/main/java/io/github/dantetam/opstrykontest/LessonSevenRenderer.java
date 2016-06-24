@@ -123,7 +123,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
     public World world;
     public WorldGenerator worldGenerator;
-    public static final int WORLD_LENGTH = 33;
+    public static final int WORLD_LENGTH = 8;
 
 	/**
 	 * Initialize the model data.
@@ -324,7 +324,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 								//mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, 1));
 							//}
                             //mCubes.add(new Solid(cubePositionData, cubeNormalData, cubeTextureCoordinateData, mRequestedCubeFactor));
-                            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
+                            //mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
 
                             mActualCubeFactor = mRequestedCubeFactor;
 						} catch (OutOfMemoryError err) {
@@ -383,7 +383,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		
 		// Use culling to remove back faces.
-		//TODO: GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		
 		// Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);						
@@ -469,7 +469,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
 		//for (int i = 0; i < mCubes.parts.size(); i++) {
         if (mCubes == null || mCubes.parts.size() == 0) {
-            generateCubes(mActualCubeFactor);
+            //generateCubes(mActualCubeFactor);
+            mCubes = new Model();
+            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
             return;
             /*mCubes = new Model();
             mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));

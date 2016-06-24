@@ -16,10 +16,10 @@ public class WorldGenerator {
     }
 
     public void init() {
-        int[][] biomes = new DiamondSquare(world.rows, 10, 0.4).seed(870).getIntTerrain(0, Tile.Biome.numBiomes - 1);
-        int[][] terrains = new DiamondSquare(world.rows, 10, 0.4).seed(0417).getIntTerrain(0, Tile.Terrain.numTerrains - 1);
-        Tile.Resource[][] resources = makeNewResources(world.rows, world.cols);
-        int[][] elevations = new DiamondSquare(world.rows, 10, 0.5).seed(916).getIntTerrain(1, 10);
+        int[][] biomes = new DiamondSquare(world.totalX, 10, 0.4).seed(870).getIntTerrain(0, Tile.Biome.numBiomes - 1);
+        int[][] terrains = new DiamondSquare(world.totalZ, 10, 0.4).seed(0417).getIntTerrain(0, Tile.Terrain.numTerrains - 1);
+        Tile.Resource[][] resources = makeNewResources(world.totalX, world.totalZ);
+        int[][] elevations = new DiamondSquare(world.totalX, 10, 0.5).seed(916).getIntTerrain(1, 10);
         world.init(biomes, terrains, resources, elevations);
     }
 

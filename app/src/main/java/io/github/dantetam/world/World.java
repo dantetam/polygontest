@@ -13,19 +13,31 @@ public class World {
     public int totalX, totalZ;
 
     //x represents height, z represents length
-    public World(int totalX, int totalZ) {
+    public World(int q, int r) {
         //tree = new WorldTree();
-        hexes = new Tile[totalX][];
-        this.totalX = totalX; this.totalZ = totalZ;
-        for (int x = 0; x < totalX; x++) {
-            int len = x % 2 == 0 ? totalZ : totalZ - 1;
-            hexes[x] = new Tile[len];
+        hexes = new Tile[r][q + r/2];
+        this.totalX = q; this.totalZ = r;
+        int startingZ = q + r/2 - 1;
+        for (int x = 0; x < r; x++) {
+            for (int z = startingZ; z >= startingZ - r; z--) {
+                hexes[x][z] = new Tile(x, z);
+            }
+            if (x % 2 == 1) {
+                startingZ--;
+            }
+        }
 
+        for (int i = 0; i < hexes.length; i++) {
+            for (int j = 0; j < hexes[0].length; j++) {
+                String stringy = hexes[i][j] != null ? "X" : "-";
+                System.out.print(stringy + " ");
+            }
+            System.out.println();
         }
     }
 
     public void init(int[][] biomes, int[][] terrain, Tile.Resource[][] resources, int[][] elevations) {
-        for (int r = 0; r < rows; r++) {
+        /*for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 Tile tile = new Tile(r, c);
                 tile.biome = Tile.Biome.fromInt(biomes[r][c]);
@@ -36,14 +48,15 @@ public class World {
                 tile.elevation = elevations[r][c];
                 tiles[r][c] = tile;
             }
-        }
+        }*/
     }
 
     public Tile getTile(int r, int c) {
-        if (r < 0 || c < 0 || r >= tiles.length || c >= tiles[0].length) {
+        /*if (r < 0 || c < 0 || r >= tiles.length || c >= tiles[0].length) {
             throw new IllegalArgumentException("Out of bounds or degenerate grid");
         }
-        return tiles[r][c];
+        return tiles[r][c];*/
+        return null;
     }
 
 }

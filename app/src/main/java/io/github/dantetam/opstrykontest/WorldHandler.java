@@ -24,17 +24,17 @@ public class WorldHandler {
 
     public List<Model> worldRep() {
         List<Model> list = new ArrayList<Model>();
-        Model[][] tiles = tileRep();
+        /*Model[][] tiles = tileRep();
         for (int r = 0; r < tiles.length; r++) {
             for (int c = 0; c < tiles[0].length; c++) {
                 list.add(tiles[r][c]);
             }
-        }
+        }*/
         return list;
     }
 
     private static float tileWidth = 4;
-    private Model[][] tileRep() {
+    /*private Model[][] tileRep() {
         if (tilesStored == null) {
             tilesStored = new Model[world.rows][world.cols];
             for (int r = 0; r < world.rows; r++) {
@@ -51,7 +51,7 @@ public class WorldHandler {
             }
         }
         return tilesStored;
-    }
+    }*/
 
     public List<Object> concat(List<Object> a, List<Object> b) {
         List<Object> combined = new ArrayList<Object>();

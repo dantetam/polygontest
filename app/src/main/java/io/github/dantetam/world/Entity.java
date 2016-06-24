@@ -8,18 +8,23 @@ import java.util.List;
  */
 public class Entity extends Representable {
 
-    public List<Tile> locations;
+    private Tile location;
     public String name;
     public Clan clan;
     public List<Item> items;
 
     public Entity() {
-        locations = new ArrayList<Tile>();
+        //locations = new ArrayList<Tile>();
         items = new ArrayList<Item>();
     }
 
-    public void move(World world, Tile t) {
-        int deltaX = t.row - locations.get(0).row;
+    public void move(Tile t) {
+        if (t == null) {
+            t.occupants.remove(this);
+        }
+        location = t;
+        t.occupants.add(this);
+        /*int deltaX = t.row - locations.get(0).row;
         int deltaY = t.col - locations.get(0).col;
         Tile center = locations.remove(0);
         for (int i = 0; i < locations.size(); i++) {
@@ -27,7 +32,11 @@ public class Entity extends Representable {
             Tile newLocation = world.getTile(old.row + deltaX, old.col + deltaY);
             locations.set(i, newLocation);
         }
-        locations.add(0, world.getTile(center.row + deltaX, center.col + deltaY));
+        locations.add(0, world.getTile(center.row + deltaX, center.col + deltaY));*/
+    }
+
+    public Tile location() {
+        return location;
     }
 
 }

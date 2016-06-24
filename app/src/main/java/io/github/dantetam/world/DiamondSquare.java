@@ -22,10 +22,12 @@ public class DiamondSquare {
         desiredWidth = width;
         desiredHeight = height;
         double raw = Math.log(Math.max(width, height) - 1) / Math.log(2);
-        if (raw - Math.round(raw) < 0.01)
+        if (raw == Math.round(raw))
             usedWidth = width;
         else
             usedWidth = (int) Math.pow(2, (int) raw + 1) + 1;
+
+        System.out.println(desiredWidth + " " + usedWidth);
     }
 
     public double[][] getTerrain(double minAmp, double maxAmp) {

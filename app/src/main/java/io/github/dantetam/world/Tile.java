@@ -8,11 +8,12 @@ import java.util.List;
  */
 public class Tile extends Representable {
 
-    public int x, y, z;
+    public int q, r;
     public int elevation;
     public Biome biome; //combined climate of land
     public Terrain terrain; //shape of the land
     public List<Resource> resources;
+    public List<Entity> occupants;
 
     public enum Biome {
         SEA (0),
@@ -81,13 +82,17 @@ public class Tile extends Representable {
         }
     }
 
-    public Tile(int a, int b, int c) {
-        x = a; y = b; z = c;
+    public Tile(int a, int c) {
+        q = a; r = c;
         resources = new ArrayList<Resource>();
+        occupants = new ArrayList<Entity>();
     }
 
+    //public float dist(Tile t) {return (float) Math.sqrt(Math.pow(row - t.row, 2) + Math.pow(col - t.col, 2));}
     public float dist(Tile t) {
-        return (float) Math.sqrt(Math.pow(row - t.row, 2) + Math.pow(col - t.col, 2));
+        return (Math.abs(q - t.q)
+                + Math.abs(q + r - t.q - t.r)
+                + Math.abs(r - t.r)) / 2;
     }
 
     public int compare(Tile a, Tile b) { //Default behavior
@@ -103,10 +108,10 @@ public class Tile extends Representable {
             return false;
         }
         Tile t = (Tile) a;
-        return x == t.x && y == t.y && z == t.z;
+        return q == t.q && r == t.r;
     }
 
-    public int compareX(Tile a, Tile b) {return a.row - b.row;}
-    public int compareY(Tile a, Tile b) {return a.col - b.col;}
+    public int compareX(Tile a, Tile b) {return a.q - b.q;}
+    public int compareY(Tile a, Tile b) {return a.r - b.r;}
 
 }
