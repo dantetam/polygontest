@@ -1,6 +1,7 @@
 package io.github.dantetam.world;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Dante on 6/13/2016.
@@ -52,11 +53,25 @@ public class World {
     }
 
     public Tile getTile(int r, int c) {
-        /*if (r < 0 || c < 0 || r >= tiles.length || c >= tiles[0].length) {
-            throw new IllegalArgumentException("Out of bounds or degenerate grid");
+        if (r < 0 || c < 0 || r >= hexes.length || c >= hexes[0].length) {
+            //throw new IllegalArgumentException("Out of bounds or degenerate grid");
+            return null;
         }
-        return tiles[r][c];*/
-        return null;
+        return hexes[r][c];
+    }
+
+
+    public static final int[][] neighborDirections = {
+            {1, 0}, {1, -1}, {0, -1},
+            {-1, 0}, {-1, 1}, {0, 1}
+    };
+    public List<Tile> neighbors(Tile t) {
+        List<Tile> temp = new ArrayList<Tile>();
+        for (int i = 0; i < neighborDirections.length; i++) {
+            Tile candidate = getTile(t.q + neighborDirections[i][0], t.r + neighborDirections[i][1]);
+            if (candidate != null) temp.add(candidate);
+        }
+        return temp;
     }
 
 }

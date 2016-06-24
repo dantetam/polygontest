@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class Tile extends Representable {
 
+    private World world;
     public int q, r;
     public int elevation;
     public Biome biome; //combined climate of land
@@ -82,7 +83,8 @@ public class Tile extends Representable {
         }
     }
 
-    public Tile(int a, int c) {
+    public Tile(World world, int a, int c) {
+        this.world = world;
         q = a; r = c;
         resources = new ArrayList<Resource>();
         occupants = new ArrayList<Entity>();
