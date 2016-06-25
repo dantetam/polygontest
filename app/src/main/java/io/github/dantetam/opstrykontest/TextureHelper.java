@@ -6,10 +6,17 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
+import java.util.HashMap;
+
 public class TextureHelper
 {
-	public static int loadTexture(final Context context, final int resourceId)
+    public static HashMap<String, Integer> texturesByName = new HashMap<>();
+
+	public static int loadTexture(final String name, final Context context, final int resourceId)
 	{
+        if (texturesByName.containsKey(name)) {
+            return texturesByName.get(name);
+        }
 		final int[] textureHandle = new int[1];
 		GLES20.glGenTextures(1, textureHandle, 0);
 
@@ -22,10 +29,15 @@ public class TextureHelper
 		else {
 			throw new RuntimeException("Error loading texture.");
 		}
+
+        texturesByName.put(name, textureHandle[0]);
 		return textureHandle[0];
 	}
 
-    public static int loadTexture(final Bitmap bitmap) {
+    public static int loadTexture(final String name, final Bitmap bitmap) {
+        if (texturesByName.containsKey(name)) {
+            return texturesByName.get(name);
+        }
         final int[] textureHandle = new int[1];
         GLES20.glGenTextures(1, textureHandle, 0);
 
@@ -37,6 +49,8 @@ public class TextureHelper
         else {
             throw new RuntimeException("Error loading texture.");
         }
+
+        texturesByName.put(name, textureHandle[0]);
         return textureHandle[0];
     }
 

@@ -13,7 +13,8 @@ import java.util.ArrayList;
 
 public class ObjLoader {
 
-    public static Solid loadSolid(final Context context,
+    public static Solid loadSolid(int textureHandle,
+                                  final Context context,
                                   final int resourceId)
     {
         float[][] data = loadObjModelByVertex(context, resourceId);
@@ -28,11 +29,11 @@ public class ObjLoader {
             }
             System.out.println();
         }*/
-        return loadSolid(data);
+        return loadSolid(textureHandle, data);
     }
 
-    public static Solid loadSolid(float[][] data) {
-        Solid solid = new Solid(data[0], data[1], data[2], 1);
+    public static Solid loadSolid(int textureHandle, float[][] data) {
+        Solid solid = new Solid(textureHandle, data[0], data[1], data[2], 1);
         solid.numVerticesToRender = data[0].length;
         return solid;
     }

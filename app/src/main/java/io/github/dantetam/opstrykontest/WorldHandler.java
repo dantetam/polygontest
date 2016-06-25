@@ -33,7 +33,24 @@ public class WorldHandler {
     public Model worldRep() {
         if (tilesStored == null) {
             tilesStored = new Model();
-            tilesStored.add(generateHexes(world));
+            //tilesStored.add(generateHexes(world));
+            for (int i = 0; i < Tile.Biome.numBiomes; i++) {
+                LessonSevenRenderer.Condition cond = new LessonSevenRenderer.Condition() {
+                    public int desiredType = 0;
+                    public void init(int i) {
+                        desiredType = i;
+                    }
+                    public boolean allowed(Object obj) {
+                        desiredType = 0;
+                        if (!(obj instanceof Tile)) return false;
+                        Tile t = (Tile) obj;
+                        return t.biome.type == desiredType;
+                    }
+                };
+                cond.init(i);
+                Solid solidsOfBiome = generateHexes(world, cond);
+                tilesStored.add(solidsOfBiome);
+            }
         }
         return tilesStored;
     }
@@ -60,8 +77,11 @@ public class WorldHandler {
 
     private Solid generateAllHexes(World world) {
         LessonSevenRenderer.Condition cond = new LessonSevenRenderer.Condition() {
-            public boolean allowed
-        }
+            public boolean allowed(Object obj) {
+                return true;
+            }
+        };
+        return generateHexes(world, cond);
     }
 
     private Solid generateHexes(World world, LessonSevenRenderer.Condition condition) {
@@ -74,15 +94,18 @@ public class WorldHandler {
             for (int z = 0; z < world.arrayLengthZ; z++) {
                 Tile tile = world.getTile(x,z);
                 if (tile == null) continue;
+                if (condition.allowed(tile)) {
+                    numHexesToRender++;
+                }
             }
         }
 
-        final float[] totalCubePositionData = new float[hexData[0].length * world.getNumHexes()];
+        final float[] totalCubePositionData = new float[hexData[0].length * numHexesToRender];
         int cubePositionDataOffset = 0;
 
-        final float[] totalNormalPositionData = new float[hexData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE * world.getNumHexes()];
+        final float[] totalNormalPositionData = new float[hexData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE * numHexesToRender];
         int cubeNormalDataOffset = 0;
-        final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * world.getNumHexes()];
+        final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * numHexesToRender];
         int cubeTextureDataOffset = 0;
 
         final float TRANSLATE_FACTOR = 3;
@@ -91,17 +114,19 @@ public class WorldHandler {
             for (int z = 0; z < world.arrayLengthZ; z++) {
                 Tile tile = world.getTile(x,z);
                 if (tile == null) continue;
+                if (condition.allowed(tile)) {
+                    float extra = x % 2 == 1 ? TRANSLATE_FACTOR * -0.5f : 0;
+                    final float[] scaledData = scaleData(hexData[0], 1, tile.elevation, 1);
+                    final float[] thisCubePositionData = translateData(scaledData, x * TRANSLATE_FACTOR, tile.elevation / 2f, z * TRANSLATE_FACTOR + extra);
 
-                float extra = x % 2 == 1 ? TRANSLATE_FACTOR*-0.5f : 0;
-                final float[] thisCubePositionData = translateData(hexData[0], x*TRANSLATE_FACTOR, 0, z*TRANSLATE_FACTOR + extra);
+                    System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
+                    cubePositionDataOffset += thisCubePositionData.length;
 
-                System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
-                cubePositionDataOffset += thisCubePositionData.length;
-
-                System.arraycopy(hexData[1], 0, totalNormalPositionData, cubeNormalDataOffset, hexData[1].length);
-                cubeNormalDataOffset += hexData[1].length;
-                System.arraycopy(hexData[2], 0, totalTexturePositionData, cubeTextureDataOffset, hexData[2].length);
-                cubeTextureDataOffset += hexData[2].length;
+                    System.arraycopy(hexData[1], 0, totalNormalPositionData, cubeNormalDataOffset, hexData[1].length);
+                    cubeNormalDataOffset += hexData[1].length;
+                    System.arraycopy(hexData[2], 0, totalTexturePositionData, cubeTextureDataOffset, hexData[2].length);
+                    cubeTextureDataOffset += hexData[2].length;
+                }
             }
             //}
         }
@@ -116,6 +141,16 @@ public class WorldHandler {
             if (i % 3 == 0) newData[i] = data[i] + dx;
             else if (i % 3 == 1) newData[i] = data[i] + dy;
             else newData[i] = data[i] + dz;
+        }
+        return newData;
+    }
+
+    private float[] scaleData(float[] data, float dx, float dy, float dz) {
+        float[] newData = new float[data.length];
+        for (int i = 0; i < data.length; i++) {
+            if (i % 3 == 0) newData[i] = data[i] * dx;
+            else if (i % 3 == 1) newData[i] = data[i] * dy;
+            else newData[i] = data[i] * dz;
         }
         return newData;
     }

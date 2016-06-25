@@ -143,8 +143,10 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor));
 	}
 
-    abstract class Condition {
+    static abstract class Condition {
         abstract boolean allowed(Object obj);
+        void init(int i) {}
+        void init() {}
     }
 
 	class GenDataRunnable implements Runnable {
@@ -317,7 +319,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 				new String[] {"a_Position",  "a_Normal", "a_TexCoordinate"});		            
         
 		// Load the texture
-		mAndroidDataHandle = TextureHelper.loadTexture(mLessonSevenActivity, R.drawable.usb_android);		
+		mAndroidDataHandle = TextureHelper.loadTexture("usb_android", mLessonSevenActivity, R.drawable.usb_android);
 		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		

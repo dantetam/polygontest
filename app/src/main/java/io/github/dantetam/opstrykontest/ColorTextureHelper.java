@@ -9,7 +9,7 @@ public class ColorTextureHelper {
 
     public static int loadColor(int width, int height, int r, int g, int b, int a) {
         Bitmap bitmap = createColor(width, height, r, g, b, a);
-        return TextureHelper.loadTexture(bitmap);
+        return TextureHelper.loadTexture("rgba"+intFromColor(r, g, b, a), bitmap);
     }
 
     public static Bitmap createColor(int width, int height, int r, int g, int b, int a) {
@@ -25,6 +25,10 @@ public class ColorTextureHelper {
         }
         Bitmap bitMap = Bitmap.createBitmap(colors, width, height, Bitmap.Config.ARGB_8888);
         return bitMap;
+    }
+
+    private static int intFromColor(int r, int g, int b, int a) {
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
 }

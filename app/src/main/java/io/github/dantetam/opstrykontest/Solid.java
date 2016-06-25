@@ -21,6 +21,8 @@ public class Solid extends RenderEntity {
     /** This will be used to pass in model texture coordinate information. */
     public int mTextureCoordinateHandle;
 
+    public int textureHandle;
+
     public int generatedCubeFactor;
 
     public final float[] position = new float[3];
@@ -28,8 +30,8 @@ public class Solid extends RenderEntity {
     public final float[] rotation = new float[4];
     public final float[] color = new float[4];
 
-    public Solid() {
-        this(defaultCubePos(), defaultCubeNormals(), defaultCubeTexture(), 1);
+    public Solid(int textureHandle) {
+        this(textureHandle, defaultCubePos(), defaultCubeNormals(), defaultCubeTexture(), 1);
     }
 
     private static float[] defaultCubePos() {
@@ -183,7 +185,9 @@ public class Solid extends RenderEntity {
         return cubeTextureCoordinateData;
     }
 
-    public Solid(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int cubeFactor) {
+    public Solid(int textureHandle, float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int cubeFactor) {
+        this.textureHandle = textureHandle;
+
         FloatBuffer cubeBuffer = getInterleavedBuffer(cubePositions, cubeNormals, cubeTextureCoordinates, cubeFactor);
         generatedCubeFactor = cubeFactor;
 
