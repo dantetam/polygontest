@@ -361,8 +361,10 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		//for (int i = 0; i < mCubes.parts.size(); i++) {
         if (mCubes == null || mCubes.parts.size() == 0) {
             //generateCubes(mActualCubeFactor);
-            mCubes = new Model();
-            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
+            //mCubes = new Model();
+            mCubes = worldHandler.worldRep();
+            //mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
+            //mCubes.add(worldHandler.generateHexes());
             return;
             /*mCubes = new Model();
             mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));

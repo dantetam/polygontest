@@ -14,7 +14,7 @@ public class WorldHandler {
 
     public World world;
     public WorldGenerator worldGenerator;
-    private Model[][] tilesStored = null;
+    private Model tilesStored = null;
 
     private LessonSevenActivity mActivity;
 
@@ -30,15 +30,12 @@ public class WorldHandler {
         this.mActivity = mActivity;
     }
 
-    public List<Model> worldRep() {
-        List<Model> list = new ArrayList<Model>();
-        /*Model[][] tiles = tileRep();
-        for (int r = 0; r < tiles.length; r++) {
-            for (int c = 0; c < tiles[0].length; c++) {
-                list.add(tiles[r][c]);
-            }
-        }*/
-        return list;
+    public Model worldRep() {
+        if (tilesStored == null) {
+            tilesStored = new Model();
+            tilesStored.add(generateHexes(world));
+        }
+        return tilesStored;
     }
 
     private static float tileWidth = 4;
@@ -74,14 +71,15 @@ public class WorldHandler {
         final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * world.getNumHexes()];
         int cubeTextureDataOffset = 0;
 
-        final float TRANSLATE_FACTOR = 1;
+        final float TRANSLATE_FACTOR = 3;
 
-        for (int x = 0; x < world.totalX; x++) {
-            for (int z = 0; z < world.totalZ; z++) {
+        for (int x = 0; x < world.arrayLengthX; x++) {
+            for (int z = 0; z < world.arrayLengthZ; z++) {
                 Tile tile = world.getTile(x,z);
                 if (tile == null) continue;
 
-                final float[] thisCubePositionData = translateData(hexData[0], x*TRANSLATE_FACTOR, 0, z*TRANSLATE_FACTOR);
+                float extra = x % 2 == 1 ? TRANSLATE_FACTOR*-0.5f : 0;
+                final float[] thisCubePositionData = translateData(hexData[0], x*TRANSLATE_FACTOR, 0, z*TRANSLATE_FACTOR + extra);
 
                 System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
                 cubePositionDataOffset += thisCubePositionData.length;

@@ -11,6 +11,7 @@ public class World {
     //private QuadTree<Tile, int[]> tiles;
     //private WorldTree tree;
     protected Tile[][] hexes;
+    public int arrayLengthX, arrayLengthZ;
     public int totalX, totalZ;
     private int numHexes = -1;
 
@@ -19,6 +20,7 @@ public class World {
         //tree = new WorldTree();
         hexes = new Tile[r][q + r/2];
         this.totalX = q; this.totalZ = r;
+        this.arrayLengthX = r; this.arrayLengthZ = q + r/2;
         int startingZ = q + r/2 - 1;
         numHexes = 0;
         for (int x = 0; x < r; x++) {
