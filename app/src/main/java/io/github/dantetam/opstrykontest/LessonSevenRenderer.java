@@ -121,8 +121,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
 	public Camera camera;
 
-    public World world;
-    public WorldGenerator worldGenerator;
+    public WorldHandler worldHandler;
+    //public World world;
+    //public WorldGenerator worldGenerator;
     public static final int WORLD_LENGTH = 8;
 
 	/**
@@ -132,60 +133,15 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mLessonSevenActivity = lessonSevenActivity;	
 		mGlSurfaceView = glSurfaceView;
 
-        world = new World(WORLD_LENGTH, WORLD_LENGTH);
-        worldGenerator = new WorldGenerator(world);
-        worldGenerator.init();
+        worldHandler = new WorldHandler(mLessonSevenActivity);
+        //world = new World(WORLD_LENGTH, WORLD_LENGTH);
+        //worldGenerator = new WorldGenerator(world);
+        //worldGenerator.init();
 	}
 
 	private void generateCubes(int cubeFactor) {
 		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor));
 	}
-
-    private float[][] generateHexes(World world) {
-        float[][] hexData = ObjLoader.loadObjModelByVertex(mLessonSevenActivity, R.raw.hexagon);
-
-        //int mRequestedCubeFactor = WORLD_LENGTH;
-
-        final float[] totalCubePositionData = new float[hexData[0].length * world.getNumHexes()];
-        int cubePositionDataOffset = 0;
-
-        final float[] totalNormalPositionData = new float[hexData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE * world.getNumHexes()];
-        int cubeNormalDataOffset = 0;
-        final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * world.getNumHexes()];
-        int cubeTextureDataOffset = 0;
-
-        final float TRANSLATE_FACTOR = 1;
-
-        for (int x = 0; x < world.totalX; x++) {
-            for (int z = 0; z < world.totalZ; z++) {
-                Tile tile = world.getTile(x,z);
-                if (tile == null) continue;
-
-                final float[] thisCubePositionData = translateData(hexData[0], x*TRANSLATE_FACTOR, 0, z*TRANSLATE_FACTOR);
-
-                System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
-                cubePositionDataOffset += thisCubePositionData.length;
-
-                System.arraycopy(hexData[1], 0, totalNormalPositionData, cubeNormalDataOffset, hexData[1].length);
-                cubeNormalDataOffset += hexData[1].length;
-                System.arraycopy(hexData[2], 0, totalTexturePositionData, cubeTextureDataOffset, hexData[2].length);
-                cubeTextureDataOffset += hexData[2].length;
-            }
-            //}
-        }
-
-        return new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
-    }
-
-    private float[] translateData(float[] data, float dx, float dy, float dz) {
-        float[] newData = new float[data.length];
-        for (int i = 0; i < data.length; i++) {
-            if (i % 3 == 0) newData[i] = data[i] + dx;
-            else if (i % 3 == 1) newData[i] = data[i] + dy;
-            else newData[i] = data[i] + dz;
-        }
-        return newData;
-    }
 
 	class GenDataRunnable implements Runnable {
 		final int mRequestedCubeFactor;
@@ -210,7 +166,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 				for (int x = 0; x < mRequestedCubeFactor; x++) {
 					//for (int y = 0; y < mRequestedCubeFactor; y++) {
 						for (int z = 0; z < mRequestedCubeFactor; z++) {
-                            Tile tile = world.getTile(x,z);
+                            Tile tile = worldHandler.world.getTile(x,z);
 
 							final float x1 = minPosition + ((positionRange / segments) * (x * 2));
 							final float x2 = minPosition + ((positionRange / segments) * ((x * 2) + 2));
