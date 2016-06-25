@@ -143,6 +143,10 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor));
 	}
 
+    abstract class Condition {
+        abstract boolean allowed(Object obj);
+    }
+
 	class GenDataRunnable implements Runnable {
 		final int mRequestedCubeFactor;
 		
@@ -450,7 +454,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
             if (mCubes != null) {
-                mCubes.parts.get(i).renderAll();
+                solid.renderAll();
             }
         }
 	}

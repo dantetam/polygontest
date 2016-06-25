@@ -58,10 +58,24 @@ public class WorldHandler {
         return tilesStored;
     }*/
 
-    private Solid generateHexes(World world) {
+    private Solid generateAllHexes(World world) {
+        LessonSevenRenderer.Condition cond = new LessonSevenRenderer.Condition() {
+            public boolean allowed
+        }
+    }
+
+    private Solid generateHexes(World world, LessonSevenRenderer.Condition condition) {
         float[][] hexData = ObjLoader.loadObjModelByVertex(mActivity, R.raw.hexagon);
 
         //int mRequestedCubeFactor = WORLD_LENGTH;
+
+        int numHexesToRender = 0;
+        for (int x = 0; x < world.arrayLengthX; x++) {
+            for (int z = 0; z < world.arrayLengthZ; z++) {
+                Tile tile = world.getTile(x,z);
+                if (tile == null) continue;
+            }
+        }
 
         final float[] totalCubePositionData = new float[hexData[0].length * world.getNumHexes()];
         int cubePositionDataOffset = 0;
