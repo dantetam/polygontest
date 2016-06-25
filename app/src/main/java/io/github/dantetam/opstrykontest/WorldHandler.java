@@ -48,7 +48,9 @@ public class WorldHandler {
                     }
                 };
                 cond.init(i);
-                Solid solidsOfBiome = generateHexes(world, cond);
+                float[] color = Tile.Biome.colorFromInt(i);
+                int textureHandle = ColorTextureHelper.loadColor(256, 128, color);
+                Solid solidsOfBiome = generateHexes(textureHandle, world, cond);
                 tilesStored.add(solidsOfBiome);
             }
         }
@@ -75,16 +77,16 @@ public class WorldHandler {
         return tilesStored;
     }*/
 
-    private Solid generateAllHexes(World world) {
+    private Solid generateAllHexes(int textureHandle, World world) {
         LessonSevenRenderer.Condition cond = new LessonSevenRenderer.Condition() {
             public boolean allowed(Object obj) {
                 return true;
             }
         };
-        return generateHexes(world, cond);
+        return generateHexes(textureHandle, world, cond);
     }
 
-    private Solid generateHexes(World world, LessonSevenRenderer.Condition condition) {
+    private Solid generateHexes(int textureHandle, World world, LessonSevenRenderer.Condition condition) {
         float[][] hexData = ObjLoader.loadObjModelByVertex(mActivity, R.raw.hexagon);
 
         //int mRequestedCubeFactor = WORLD_LENGTH;
@@ -132,7 +134,7 @@ public class WorldHandler {
         }
 
         //return new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
-        return ObjLoader.loadSolid(new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData});
+        return ObjLoader.loadSolid(textureHandle, new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData});
     }
 
     private float[] translateData(float[] data, float dx, float dy, float dz) {
