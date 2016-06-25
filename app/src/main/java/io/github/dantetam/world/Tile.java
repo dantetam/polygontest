@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by Dante on 6/13/2016.
  */
-public class Tile extends Representable {
+public class Tile extends Representable implements Traversable<Tile> {
 
     private World world;
     public int q, r;
@@ -95,6 +95,10 @@ public class Tile extends Representable {
         return (Math.abs(q - t.q)
                 + Math.abs(q + r - t.q - t.r)
                 + Math.abs(r - t.r)) / 2;
+    }
+
+    public List<Tile> neighbors() {
+        return world.neighbors(this);
     }
 
     public int compare(Tile a, Tile b) { //Default behavior

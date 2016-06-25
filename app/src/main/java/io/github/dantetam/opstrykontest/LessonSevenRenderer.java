@@ -140,7 +140,53 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	private void generateCubes(int cubeFactor) {
 		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor));
 	}
-	
+
+    private float[][] generateHexes(World world) {
+        float[][] hexData = ObjLoader.loadObjModelByVertex(mLessonSevenActivity, R.raw.hexagon);
+
+        //int mRequestedCubeFactor = WORLD_LENGTH;
+
+        final float[] totalCubePositionData = new float[hexData[0].length * world.getNumHexes()];
+        int cubePositionDataOffset = 0;
+
+        final float[] totalNormalPositionData = new float[hexData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE * world.getNumHexes()];
+        int cubeNormalDataOffset = 0;
+        final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * world.getNumHexes()];
+        int cubeTextureDataOffset = 0;
+
+        final float TRANSLATE_FACTOR = 1;
+
+        for (int x = 0; x < world.totalX; x++) {
+            for (int z = 0; z < world.totalZ; z++) {
+                Tile tile = world.getTile(x,z);
+                if (tile == null) continue;
+
+                final float[] thisCubePositionData = translateData(hexData[0], x*TRANSLATE_FACTOR, 0, z*TRANSLATE_FACTOR);
+
+                System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
+                cubePositionDataOffset += thisCubePositionData.length;
+
+                System.arraycopy(hexData[1], 0, totalNormalPositionData, cubeNormalDataOffset, hexData[1].length);
+                cubeNormalDataOffset += hexData[1].length;
+                System.arraycopy(hexData[2], 0, totalTexturePositionData, cubeTextureDataOffset, hexData[2].length);
+                cubeTextureDataOffset += hexData[2].length;
+            }
+            //}
+        }
+
+        return new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+    }
+
+    private float[] translateData(float[] data, float dx, float dy, float dz) {
+        float[] newData = new float[data.length];
+        for (int i = 0; i < data.length; i++) {
+            if (i % 3 == 0) newData[i] = data[i] + dx;
+            else if (i % 3 == 1) newData[i] = data[i] + dy;
+            else newData[i] = data[i] + dz;
+        }
+        return newData;
+    }
+
 	class GenDataRunnable implements Runnable {
 		final int mRequestedCubeFactor;
 		
@@ -151,117 +197,6 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		@Override
 		public void run() {			
 			try {
-				// X, Y, Z
-				// The normal is used in light calculations and is a vector which points
-				// orthogonal to the plane of the surface. For a cube model, the normals
-				// should be orthogonal to the points of each face.
-				final float[] cubeNormalData =
-				{
-						// Front face
-						0.0f, 0.0f, 1.0f,
-						0.0f, 0.0f, 1.0f,
-						0.0f, 0.0f, 1.0f,
-						0.0f, 0.0f, 1.0f,
-						0.0f, 0.0f, 1.0f,
-						0.0f, 0.0f, 1.0f,
-
-						// Right face
-						1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, 0.0f,
-						1.0f, 0.0f, 0.0f,
-
-						// Back face
-						0.0f, 0.0f, -1.0f,
-						0.0f, 0.0f, -1.0f,
-						0.0f, 0.0f, -1.0f,
-						0.0f, 0.0f, -1.0f,
-						0.0f, 0.0f, -1.0f,
-						0.0f, 0.0f, -1.0f,
-
-						// Left face
-						-1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f,
-
-						// Top face
-						0.0f, 1.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,
-						0.0f, 1.0f, 0.0f,
-
-						// Bottom face
-						0.0f, -1.0f, 0.0f,
-						0.0f, -1.0f, 0.0f,
-						0.0f, -1.0f, 0.0f,
-						0.0f, -1.0f, 0.0f,
-						0.0f, -1.0f, 0.0f,
-						0.0f, -1.0f, 0.0f
-				};
-
-				// S, T (or X, Y)
-				// Texture coordinate data.
-				// Because images have a Y axis pointing downward (values increase as you move down the image) while
-				// OpenGL has a Y axis pointing upward, we adjust for that here by flipping the Y axis.
-				// What's more is that the texture coordinates are the same for every face.
-				final float[] cubeTextureCoordinateData =
-				{
-						// Front face
-						0.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-						1.0f, 0.0f,
-
-						// Right face
-						0.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-						1.0f, 0.0f,
-
-						// Back face
-						0.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-						1.0f, 0.0f,
-
-						// Left face
-						0.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-						1.0f, 0.0f,
-
-						// Top face
-						0.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-						1.0f, 0.0f,
-
-						// Bottom face
-						0.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 0.0f,
-						0.0f, 1.0f,
-						1.0f, 1.0f,
-						1.0f, 0.0f
-				};
-
 				final float[] cubePositionData = new float[108 * mRequestedCubeFactor * mRequestedCubeFactor];
 				int cubePositionDataOffset = 0;
 
@@ -471,7 +406,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
         if (mCubes == null || mCubes.parts.size() == 0) {
             //generateCubes(mActualCubeFactor);
             mCubes = new Model();
-            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));
+            mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
             return;
             /*mCubes = new Model();
             mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.teapot));

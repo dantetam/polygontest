@@ -13,7 +13,7 @@ import java.util.PriorityQueue;
  * Created by Dante on 6/23/2016.
  * Took this from 61b proj3 because it is cleaner, even if it uses more memory
  */
-public class Pathfinder<GraphNode extends Traversable> {
+public class Pathfinder<GraphNode extends Traversable<GraphNode>> {
 
     public List<GraphNode> findPath(GraphNode start, final GraphNode end) {
         List<GraphNode> results = new ArrayList<>();

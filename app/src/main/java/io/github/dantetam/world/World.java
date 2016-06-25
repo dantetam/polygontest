@@ -12,6 +12,7 @@ public class World {
     //private WorldTree tree;
     protected Tile[][] hexes;
     public int totalX, totalZ;
+    private int numHexes = -1;
 
     //x represents height, z represents length
     public World(int q, int r) {
@@ -19,9 +20,11 @@ public class World {
         hexes = new Tile[r][q + r/2];
         this.totalX = q; this.totalZ = r;
         int startingZ = q + r/2 - 1;
+        numHexes = 0;
         for (int x = 0; x < r; x++) {
             for (int z = startingZ; z >= startingZ - r; z--) {
-                hexes[x][z] = new Tile(x, z);
+                hexes[x][z] = new Tile(this, x, z);
+                numHexes++;
             }
             if (x % 2 == 1) {
                 startingZ--;
@@ -38,18 +41,19 @@ public class World {
     }
 
     public void init(int[][] biomes, int[][] terrain, Tile.Resource[][] resources, int[][] elevations) {
-        /*for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++) {
-                Tile tile = new Tile(r, c);
+        for (int r = 0; r < biomes.length; r++) {
+            for (int c = 0; c < biomes[0].length; c++) {
+                //Tile tile = new Tile(r, c);
+                Tile tile = getTile(r,c);
+                if (tile == null) continue;
                 tile.biome = Tile.Biome.fromInt(biomes[r][c]);
                 tile.terrain = Tile.Terrain.fromInt(terrain[r][c]);
                 tile.resources = new ArrayList<Tile.Resource>();
                 //tile.resources.add(Tile.Resource.fromInt(resources[r][c]));
                 tile.resources.add(resources[r][c]);
                 tile.elevation = elevations[r][c];
-                tiles[r][c] = tile;
             }
-        }*/
+        }
     }
 
     public Tile getTile(int r, int c) {
@@ -59,7 +63,6 @@ public class World {
         }
         return hexes[r][c];
     }
-
 
     public static final int[][] neighborDirections = {
             {1, 0}, {1, -1}, {0, -1},
@@ -72,6 +75,13 @@ public class World {
             if (candidate != null) temp.add(candidate);
         }
         return temp;
+    }
+
+    public int getNumHexes() {
+        if (numHexes == -1) {
+            throw new RuntimeException("World has not been initialized");
+        }
+        return numHexes;
     }
 
 }
