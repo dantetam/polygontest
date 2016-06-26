@@ -8,10 +8,10 @@ import java.util.List;
  */
 public class Model {
 
-    public List<Solid> parts;
+    public List<RenderEntity> parts;
 
     public Model() {
-        parts = new ArrayList<Solid>();
+        parts = new ArrayList<RenderEntity>();
     }
 
     public void add(Solid solid) {
@@ -19,7 +19,7 @@ public class Model {
     }
 
     public void release() {
-        for (Solid solid: parts) {
+        for (RenderEntity solid: parts) {
             solid.release();
         }
     }

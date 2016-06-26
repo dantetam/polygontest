@@ -30,9 +30,6 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	private final LessonSevenActivity mLessonSevenActivity;
 	private final GLSurfaceView mGlSurfaceView;
 	
-	/** Android's OpenGL bindings are broken until Gingerbread, so we use LibGDX bindings here. */
-	//private final AndroidGL20 mGlEs20;
-	
 	/**
 	 * Store the model matrix. This matrix is used to move models from object space (where each model can be thought
 	 * of being located at the center of the universe) to world space.
@@ -65,16 +62,15 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	 */
 	private float[] mLightModelMatrix = new float[16];		
 	
-	/** This will be used to pass in the transformation matrix. */
-	private int mMVPMatrixHandle;
-	
-	/** This will be used to pass in the modelview matrix. */
+    /** Pass in data to shaders by OpenGL handles */
+    private int mProgramHandle;
+    private int mAndroidDataHandle;
+    private int mWhiteTextureHandle;
+
+    private int mMVPMatrixHandle;
 	private int mMVMatrixHandle;
-	
-	/** This will be used to pass in the light position. */
 	private int mLightPosHandle;
-	
-	/** This will be used to pass in the texture. */
+    private int mCameraPosHandle;
 	private int mTextureUniformHandle;
 	
 	/** Additional info for cube generation. */
@@ -103,27 +99,19 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	/** Used to hold the transformed position of the light in eye space (after transformation via modelview matrix) */
 	private final float[] mLightPosInEyeSpace = new float[4];
 	
-	/** This is a handle to our cube shading program. */
-	private int mProgramHandle;
-	
-	/** These are handles to our texture data. */
-	private int mAndroidDataHandle;		
-	
 	// These still work without volatile, but refreshes are not guaranteed to happen.					
 	public volatile float mDeltaX;					
 	public volatile float mDeltaY;	
 	
 	/** Thread executor for generating cube data in the background. */
 	private final ExecutorService mSingleThreadedExecutor = Executors.newSingleThreadExecutor();
-	
-	/** The current cubes object. */
+
 	private Model mCubes;
+    private Lines mLines;
 
 	public Camera camera;
 
     public WorldHandler worldHandler;
-    //public World world;
-    //public WorldGenerator worldGenerator;
     public static final int WORLD_LENGTH = 8;
 
 	/**
@@ -132,8 +120,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	public LessonSevenRenderer(final LessonSevenActivity lessonSevenActivity, final GLSurfaceView glSurfaceView) {
 		mLessonSevenActivity = lessonSevenActivity;	
 		mGlSurfaceView = glSurfaceView;
+        mGlSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
-        worldHandler = new WorldHandler(mLessonSevenActivity);
+        worldHandler = new WorldHandler(mLessonSevenActivity, WORLD_LENGTH, WORLD_LENGTH);
         ColorTextureHelper.init(mLessonSevenActivity);
         //world = new World(WORLD_LENGTH, WORLD_LENGTH);
         //worldGenerator = new WorldGenerator(world);
@@ -281,12 +270,14 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		
 		// Use culling to remove back faces.
-		//GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		
 		// Enable depth testing
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);						
-		
-		// Position the eye in front of the origin.
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
+        //GLES20.glEnable(GLES20.GL_STENCIL_TEST);
+
+        // Position the eye in front of the origin.
 		/*final float eyeX = 4.0f;
 		final float eyeY = 4.0f;
 		final float eyeZ = 4.0f;
@@ -331,6 +322,14 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 
+        mWhiteTextureHandle = ColorTextureHelper.loadColor(255, 255, 255, 255);
+        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mWhiteTextureHandle);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mWhiteTextureHandle);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
         // Initialize the accumulated rotation matrix
         Matrix.setIdentityM(mAccumulatedRotation, 0);        
 	}	
@@ -372,6 +371,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             //generateCubes(mActualCubeFactor);
             //mCubes = new Model();
             mCubes = worldHandler.worldRep();
+            mLines = new Lines(mWhiteTextureHandle, worldHandler.tesselatedHexes[0], worldHandler.tesselatedHexes[1], worldHandler.tesselatedHexes[2]);
             //mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
             //mCubes.add(worldHandler.generateHexes());
             return;
@@ -392,6 +392,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVPMatrix");
             mMVMatrixHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_MVMatrix");
             mLightPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_LightPos");
+            mCameraPosHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_CameraPos");
             mTextureUniformHandle = GLES20.glGetUniformLocation(mProgramHandle, "u_Texture");
             solid.mPositionHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Position");
             solid.mNormalHandle = GLES20.glGetAttribLocation(mProgramHandle, "a_Normal");
@@ -447,6 +448,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             // Pass in the light position in eye space.
             GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
 
+            GLES20.glUniform3f(mCameraPosHandle, camera.eyeX, camera.eyeY, camera.eyeZ);
+
             // Pass in the texture information
             // Set the active texture unit to texture unit 0.
             //GLES20.glEnable(GLES20.GL_TEXTURE_2D);
@@ -468,33 +471,25 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
-            GLES20.glClearStencil(0);
-            GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
-
-            // Render the mesh into the stencil buffer.
-
-            GLES20.glEnable(GLES20.GL_STENCIL_TEST);
-
-            GLES20.glStencilFunc(GLES20.GL_ALWAYS, 1, -1);
-            GLES20.glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
+            //---
+            GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
+            GLES20.glPolygonOffset(2.0f, 2.0f);
 
             if (mCubes != null) {
-                solid.renderAll();
+                //solid.renderAll(GLES20.GL_TRIANGLES);
             }
 
-            // Render the thick wireframe version.
-
-            GLES20.glStencilFunc(GLES20.GL_NOTEQUAL, 1, -1);
-            GLES20.glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
-
-            GLES20.glLineWidth(3);
-            GLES20.glPolygonMode(GLES20.GL_FRONT, GLES20.GL_LINE);
+            GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
+            GLES20.glLineWidth(1.0f);
 
             if (mCubes != null) {
-                solid.renderAll();
+                //solid.renderAll(GLES20.GL_LINES);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mLines.textureHandle);
+                mLines.renderAll();
             }
             //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }
+
 	}
 
 }

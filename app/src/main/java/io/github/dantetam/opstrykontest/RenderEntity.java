@@ -22,6 +22,7 @@ public abstract class RenderEntity {
     static final int BYTES_PER_FLOAT = 4;
 
     abstract void renderAll();
+    abstract void renderAll(int mode);
     abstract void render(int indexBlock);
     abstract void release();
 

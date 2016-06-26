@@ -25,8 +25,8 @@ public class WorldHandler {
     static final int TEXTURE_COORDINATE_DATA_SIZE = 2;
     static final int BYTES_PER_FLOAT = 4;
 
-    public WorldHandler(LessonSevenActivity mActivity) {
-        world = new World(LessonSevenRenderer.WORLD_LENGTH, LessonSevenRenderer.WORLD_LENGTH);
+    public WorldHandler(LessonSevenActivity mActivity, int len1, int len2) {
+        world = new World(len1, len2);
         worldGenerator = new WorldGenerator(world);
         worldGenerator.init();
         this.mActivity = mActivity;
@@ -98,6 +98,7 @@ public class WorldHandler {
         return generateHexes(textureHandle, world, cond);
     }
 
+    public float[][] tesselatedHexes;
     private Solid generateHexes(int textureHandle, World world, LessonSevenRenderer.Condition condition) {
         float[][] hexData = ObjLoader.loadObjModelByVertex(mActivity, R.raw.hexagon);
 
@@ -129,8 +130,8 @@ public class WorldHandler {
                 if (tile == null) continue;
                 if (condition.allowed(tile)) {
                     float extra = x % 2 == 1 ? TRANSLATE_FACTOR * -0.5f : 0;
-                    final float[] scaledData = scaleData(hexData[0], 1, tile.elevation, 1);
-                    final float[] thisCubePositionData = translateData(scaledData, x * TRANSLATE_FACTOR, tile.elevation / 2f, z * TRANSLATE_FACTOR + extra);
+                    final float[] scaledData = scaleData(hexData[0], 1, tile.elevation / 5f, 1);
+                    final float[] thisCubePositionData = translateData(scaledData, x * TRANSLATE_FACTOR, tile.elevation / 10f, z * TRANSLATE_FACTOR + extra);
 
                     System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
                     cubePositionDataOffset += thisCubePositionData.length;
@@ -144,8 +145,8 @@ public class WorldHandler {
             //}
         }
 
-        //return new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
-        Solid hexes = ObjLoader.loadSolid(textureHandle, new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData});
+        tesselatedHexes = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+        Solid hexes = ObjLoader.loadSolid(textureHandle, tesselatedHexes);
         return hexes;
     }
 

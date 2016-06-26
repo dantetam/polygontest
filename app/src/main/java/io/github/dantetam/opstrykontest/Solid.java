@@ -22,6 +22,7 @@ public class Solid extends RenderEntity {
     public int mTextureCoordinateHandle;
 
     public int textureHandle;
+    public int strokeTextureHandle;
 
     public int generatedCubeFactor;
 
@@ -208,8 +209,12 @@ public class Solid extends RenderEntity {
         cubeBuffer = null;
     }
 
-    public int numVerticesToRender;
     public void renderAll() {
+        renderAll(GLES20.GL_TRIANGLES);
+    }
+
+    public int numVerticesToRender;
+    public void renderAll(int mode) {
         final int stride = (POSITION_DATA_SIZE + NORMAL_DATA_SIZE + TEXTURE_COORDINATE_DATA_SIZE) * BYTES_PER_FLOAT;
 
         // Pass in the position information
@@ -232,7 +237,7 @@ public class Solid extends RenderEntity {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Draw the cubes.
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, numVerticesToRender); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
+        GLES20.glDrawArrays(mode, 0, numVerticesToRender); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
     }
 
     public void render(int blockIndex) {
@@ -259,7 +264,7 @@ public class Solid extends RenderEntity {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Draw the cubes.
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, blockIndex*36, 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
+        GLES20.glDrawArrays(GLES20.GL_LINES, blockIndex*36, 36); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
     }
 
     public void release() {

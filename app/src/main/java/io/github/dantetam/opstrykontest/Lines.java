@@ -8,6 +8,7 @@ import java.nio.FloatBuffer;
 
 /**
  * Created by Dante on 6/20/2016.
+ * For wireframes.
  */
 public class Lines extends RenderEntity {
     public int mCubeBufferIdx = -1;
@@ -43,7 +44,7 @@ public class Lines extends RenderEntity {
 
         FloatBuffer cubeBuffer = getInterleavedBuffer(lineVertices, lineNormals, lineTextures);
 
-        numVerticesToRender = lineVertices.length;
+        numVerticesToRender = lineVertices.length * 2;
 
         // Second, copy these buffers into OpenGL's memory. After, we don't need to keep the client-side buffers around.
         final int buffers[] = new int[1];
@@ -61,9 +62,9 @@ public class Lines extends RenderEntity {
     }
 
     FloatBuffer getInterleavedBuffer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates) {
-        final int cubeDataLength = cubePositions.length
-                + (cubeNormals.length)
-                + (cubeTextureCoordinates.length);
+        final int cubeDataLength = cubePositions.length * 2
+                + (cubeNormals.length * 2)
+                + (cubeTextureCoordinates.length * 2);
         int cubePositionOffset = 0;
         int cubeNormalOffset = 0;
         int cubeTextureOffset = 0;
@@ -71,7 +72,7 @@ public class Lines extends RenderEntity {
         final FloatBuffer cubeBuffer = ByteBuffer.allocateDirect(cubeDataLength * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
 
-        for (int v = 0; v < cubePositions.length / POSITION_DATA_SIZE; v++) {
+        /*for (int v = 0; v < cubePositions.length / POSITION_DATA_SIZE; v++) {
             //float[] result = new float[cubeBuffer.limit()];
             //cubeBuffer.get(result);
             //System.out.println(">>> " + cubePositions.length + " " + cubePositionOffset + " " + cubeDataLength);
@@ -81,6 +82,18 @@ public class Lines extends RenderEntity {
             cubeNormalOffset += NORMAL_DATA_SIZE;
             cubeBuffer.put(cubeTextureCoordinates, cubeTextureOffset, TEXTURE_COORDINATE_DATA_SIZE);
             cubeTextureOffset += TEXTURE_COORDINATE_DATA_SIZE;
+        }*/
+
+        for (int v = 0; v < cubePositions.length; v += 9) { //for each set of three triangles
+            //float[] result = new float[cubeBuffer.limit()];
+            //cubeBuffer.get(result);
+            //System.out.println(">>> " + cubePositions.length + " " + cubePositionOffset + " " + cubeDataLength);
+            int[] vertexLocations = {v, v+3, v+3, v+6, v+6, v};
+            for (int i = 0; i < vertexLocations.length; i++) {
+                cubeBuffer.put(cubePositions, i, 3);
+                cubeBuffer.put(cubeNormals, 0, 3);
+                cubeBuffer.put(cubeTextureCoordinates, 0, 2);
+            }
         }
 
         cubeBuffer.position(0);
@@ -88,8 +101,12 @@ public class Lines extends RenderEntity {
         return cubeBuffer;
     }
 
-    public int numVerticesToRender;
     public void renderAll() {
+        renderAll(GLES20.GL_LINES);
+    }
+
+    public int numVerticesToRender;
+    public void renderAll(int mode) {
         final int stride = (POSITION_DATA_SIZE + NORMAL_DATA_SIZE + TEXTURE_COORDINATE_DATA_SIZE) * BYTES_PER_FLOAT;
 
         // Pass in the position information
@@ -112,7 +129,7 @@ public class Lines extends RenderEntity {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
         // Draw the cubes.
-        GLES20.glDrawArrays(GLES20.GL_LINES, 0, numVerticesToRender); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
+        GLES20.glDrawArrays(mode, 0, numVerticesToRender); //36 vertices in a cube, of size 3 (GLES20.GL_TRIANGLES)
     }
 
     public void render(int blockIndex) {
