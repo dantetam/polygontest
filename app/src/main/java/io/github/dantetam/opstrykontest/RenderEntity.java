@@ -25,7 +25,7 @@ public abstract class RenderEntity {
     abstract void render(int indexBlock);
     abstract void release();
 
-    FloatBuffer[] getBuffers(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
+   /* FloatBuffer[] getBuffers(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
         // First, copy cube information into client-side floating point buffers.
         final FloatBuffer cubePositionsBuffer;
         final FloatBuffer cubeNormalsBuffer;
@@ -82,7 +82,7 @@ public abstract class RenderEntity {
         cubeBuffer.position(0);
 
         return cubeBuffer;
-    }
+    }*/
 
     FloatBuffer getInterleavedBuffer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
         final int cubeDataLength = cubePositions.length

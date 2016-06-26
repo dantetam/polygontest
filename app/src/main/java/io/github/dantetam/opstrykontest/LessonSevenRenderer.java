@@ -468,10 +468,31 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
+            GLES20.glClearStencil(0);
+            GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+
+            // Render the mesh into the stencil buffer.
+
+            GLES20.glEnable(GLES20.GL_STENCIL_TEST);
+
+            GLES20.glStencilFunc(GLES20.GL_ALWAYS, 1, -1);
+            GLES20.glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
+
             if (mCubes != null) {
                 solid.renderAll();
             }
 
+            // Render the thick wireframe version.
+
+            GLES20.glStencilFunc(GLES20.GL_NOTEQUAL, 1, -1);
+            GLES20.glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
+
+            GLES20.glLineWidth(3);
+            GLES20.glPolygonMode(GLES20.GL_FRONT, GLES20.GL_LINE);
+
+            if (mCubes != null) {
+                solid.renderAll();
+            }
             //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }
 	}

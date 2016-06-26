@@ -9,7 +9,7 @@ import java.nio.FloatBuffer;
 /**
  * Created by Dante on 6/20/2016.
  */
-public class Lines {
+public class Lines extends RenderEntity {
     public int mCubeBufferIdx = -1;
 
     /** This will be used to pass in model position information. */

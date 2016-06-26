@@ -62,6 +62,8 @@ public class WorldHandler {
                 //int textureHandle = TextureHelper.loadTexture("usb_android");
                 Solid solidsOfBiome = generateHexes(textureHandle, world, cond);
                 tilesStored.add(solidsOfBiome);
+                //tilesStored.add(solidsOfBiome[0]);
+                //tilesStored.add(solidsOfBiome[1]);
             }
         }
         return tilesStored;
@@ -114,7 +116,6 @@ public class WorldHandler {
 
         final float[] totalCubePositionData = new float[hexData[0].length * numHexesToRender];
         int cubePositionDataOffset = 0;
-
         final float[] totalNormalPositionData = new float[hexData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE * numHexesToRender];
         int cubeNormalDataOffset = 0;
         final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * numHexesToRender];
@@ -144,7 +145,8 @@ public class WorldHandler {
         }
 
         //return new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
-        return ObjLoader.loadSolid(textureHandle, new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData});
+        Solid hexes = ObjLoader.loadSolid(textureHandle, new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData});
+        return hexes;
     }
 
     private float[] translateData(float[] data, float dx, float dy, float dz) {
