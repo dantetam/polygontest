@@ -465,6 +465,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
             // Tell the texture uniform sampler to use this texture in the
             // shader by binding to texture unit 0.
+
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
             if (mCubes != null) {
