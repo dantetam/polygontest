@@ -12,6 +12,12 @@ public class TextureHelper
 {
     public static HashMap<String, Integer> texturesByName = new HashMap<>();
 
+    public static int loadTexture(final String name) {
+        if (texturesByName.containsKey(name)) {
+            return texturesByName.get(name);
+        }
+        return -1;
+    }
 	public static int loadTexture(final String name, final Context context, final int resourceId)
 	{
         if (texturesByName.containsKey(name)) {

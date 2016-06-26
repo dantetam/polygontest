@@ -16,7 +16,7 @@ public class WorldGenerator {
     }
 
     public void init() {
-        int width = Math.max(world.totalX, world.totalZ);
+        int width = Math.max(world.arrayLengthX, world.arrayLengthZ);
         int[][] biomes = new DiamondSquare(width, 10, 0.4).seed(870).getIntTerrain(0, Tile.Biome.numBiomes - 1);
         int[][] terrains = new DiamondSquare(width, 10, 0.4).seed(0417).getIntTerrain(0, Tile.Terrain.numTerrains - 1);
         Tile.Resource[][] resources = makeNewResources(width, width);

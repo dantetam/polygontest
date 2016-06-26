@@ -28,13 +28,13 @@ public class Tile extends Representable implements Traversable<Tile> {
         Biome(int t) {type = t;}
         private static Biome[] types = {SEA, ICE, TUNDRA, DESERT, STEPPE, FOREST, RAINFOREST};
         private static float[][] colors = {
-                {0,0,1},
-                {0,0.5f,1},
-                {0.5f,0.5f,1},
-                {1,0.5f,0.5f},
-                {0,1,0},
-                {0,0.5f,0},
-                {1,0.5f,0}
+                {0,0,255,255},
+                {0,150,1,255},
+                {150,150,1,255},
+                {255,150,150,255},
+                {0,255,0,255},
+                {0,150,0,255},
+                {250,155,0,255}
         };
         public static Biome fromInt(int n) {
             if (n >= 0 && n < types.length) {

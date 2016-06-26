@@ -134,6 +134,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mGlSurfaceView = glSurfaceView;
 
         worldHandler = new WorldHandler(mLessonSevenActivity);
+        ColorTextureHelper.init(mLessonSevenActivity);
         //world = new World(WORLD_LENGTH, WORLD_LENGTH);
         //worldGenerator = new WorldGenerator(world);
         //worldGenerator.init();
@@ -280,7 +281,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		
 		// Use culling to remove back faces.
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		//GLES20.glEnable(GLES20.GL_CULL_FACE);
 		
 		// Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);						
@@ -301,8 +302,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		final float upZ = 0.0f;*/
 
 		camera = new Camera();
-		camera.moveTo(3f, 6f, 6f);
-		camera.pointTo(3f, 3f, 3f);
+		camera.moveTo(10f, 10f, 10f);
+		camera.pointTo(5f, 5f, 5f);
 		// Set the view matrix. This matrix can be said to represent the camera position.
 		// NOTE: In OpenGL 1, a ModelView matrix is used, which is a combination of a model and
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
@@ -316,7 +317,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES20.GL_FRAGMENT_SHADER, fragmentShader);		
 		
 		mProgramHandle = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
-				new String[] {"a_Position",  "a_Normal", "a_TexCoordinate"});		            
+				new String[] {"a_Position", "a_Normal", "a_TexCoordinate"});
         
 		// Load the texture
 		mAndroidDataHandle = TextureHelper.loadTexture("usb_android", mLessonSevenActivity, R.drawable.usb_android);
@@ -326,8 +327,10 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);		
-        
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+
         // Initialize the accumulated rotation matrix
         Matrix.setIdentityM(mAccumulatedRotation, 0);        
 	}	
@@ -446,10 +449,19 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 
             // Pass in the texture information
             // Set the active texture unit to texture unit 0.
+            //GLES20.glEnable(GLES20.GL_TEXTURE_2D);
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
             // Bind the texture to this unit.
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);
+            //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, solid.textureHandle);
+            //System.out.println(mAndroidDataHandle + " " + solid.textureHandle);
+
+            /*GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, solid.textureHandle);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, solid.textureHandle);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);*/
 
             // Tell the texture uniform sampler to use this texture in the
             // shader by binding to texture unit 0.
@@ -458,6 +470,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             if (mCubes != null) {
                 solid.renderAll();
             }
+
+            //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }
 	}
 

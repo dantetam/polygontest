@@ -1,5 +1,7 @@
 package io.github.dantetam.opstrykontest;
 
+import android.opengl.GLES20;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +43,6 @@ public class WorldHandler {
                         desiredType = i;
                     }
                     public boolean allowed(Object obj) {
-                        desiredType = 0;
                         if (!(obj instanceof Tile)) return false;
                         Tile t = (Tile) obj;
                         return t.biome.type == desiredType;
@@ -49,7 +50,16 @@ public class WorldHandler {
                 };
                 cond.init(i);
                 float[] color = Tile.Biome.colorFromInt(i);
-                int textureHandle = ColorTextureHelper.loadColor(256, 128, color);
+                //float[] color = {(int)(Math.random()*256f), (int)(Math.random()*256f), (int)(Math.random()*256f), 255f};
+                int textureHandle = ColorTextureHelper.loadColor(color);
+
+                GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle);
+                GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+
+                //int textureHandle = TextureHelper.loadTexture("usb_android");
                 Solid solidsOfBiome = generateHexes(textureHandle, world, cond);
                 tilesStored.add(solidsOfBiome);
             }
