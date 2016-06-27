@@ -21,6 +21,10 @@ public class WorldHandler {
     private Model tilesStored = null;
     public HashMap<Tile.Biome, Solid> storedBiomeTiles;
 
+    public HashMap<Tile, float[]> storedTileVertexPositions;
+    public HashMap<Tile, Solid> storedTileImprovements;
+    public Model improvementsStored;
+
     private LessonSevenActivity mActivity;
 
     static final int POSITION_DATA_SIZE = 3;
@@ -45,6 +49,8 @@ public class WorldHandler {
         if (tilesStored == null) {
             tilesStored = new Model();
             storedBiomeTiles = new HashMap<>();
+            storedTileVertexPositions = new HashMap<>();
+            storedTileImprovements = new HashMap<>();
             //tilesStored.add(generateHexes(world));
             for (int i = 0; i < Tile.Biome.numBiomes; i++) {
                 LessonSevenRenderer.Condition cond = new LessonSevenRenderer.Condition() {
@@ -78,6 +84,20 @@ public class WorldHandler {
             }
         }
         return tilesStored;
+    }
+
+    public Model tileImprovementRep() {
+        return improvementsStored;
+    }
+
+    public Model updateTileImprovement(List<Tile> tiles) {
+        if (improvementsStored == null) {
+            improvementsStored = new Model();
+        }
+        for (Tile tile: tiles) {
+            
+        }
+        return improvementsStored;
     }
 
     private static float tileWidth = 4;
@@ -154,9 +174,14 @@ public class WorldHandler {
                 if (tile == null) continue;
                 if (condition.allowed(tile)) {
                     tile.elevation = 0;
+
                     float extra = x % 2 == 1 ? TRANSLATE_FACTORZ * -0.5f : 0;
                     final float[] scaledData = scaleData(hexData[0], 1, tile.elevation / 5f, 1);
-                    final float[] thisCubePositionData = translateData(scaledData, x * TRANSLATE_FACTORX, tile.elevation / 10f, z * TRANSLATE_FACTORZ + extra);
+
+                    float[] vertices = {x * TRANSLATE_FACTORX, tile.elevation / 5f, z * TRANSLATE_FACTORZ + extra};
+                    storedTileVertexPositions.put(tile, vertices);
+
+                    final float[] thisCubePositionData = translateData(scaledData, vertices[0], vertices[1]/2f, vertices[2]);
 
                     System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
                     cubePositionDataOffset += thisCubePositionData.length;

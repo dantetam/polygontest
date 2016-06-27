@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /*
 This class is from an old project inspired by ThinMatrix's OpenGL/LWJGL tutorials.
@@ -51,6 +52,8 @@ All other data within the OBJ is ignored, for now.
  */
 public class ObjLoader {
 
+    public static HashMap<String, float[][]> solidData = new HashMap<>();
+
     /**
      * Parse an OBJ to create a solid
      * @param textureHandle A textureHandle to bind to
@@ -59,10 +62,15 @@ public class ObjLoader {
      * @return A new Solid (a VBO) containing the data contained with the resource
      */
     public static Solid loadSolid(int textureHandle,
+                                  String textureName,
                                   final Context context,
                                   final int resourceId)
     {
+        if (solidData.containsKey(textureName)) {
+            return loadSolid(textureHandle, null, solidData.get(textureName));
+        }
         float[][] data = loadObjModelByVertex(context, resourceId);
+        //solidData.put(textureName, data);
         //Solid solid = new Solid(data[0], data[1], data[2], 1);
         /*for (int t = 0; t < 3; t++) {
             for (int i = 0; i < data[t].length; i++) {
@@ -74,7 +82,7 @@ public class ObjLoader {
             }
             System.out.println();
         }*/
-        return loadSolid(textureHandle, data);
+        return loadSolid(textureHandle, textureName, data);
     }
 
     /**
@@ -84,8 +92,9 @@ public class ObjLoader {
      * @param data
      * @return A new Solid (a VBO) containing the data contained with the resource
      */
-    public static Solid loadSolid(int textureHandle, float[][] data) {
+    public static Solid loadSolid(int textureHandle, String textureName, float[][] data) {
         Solid solid = new Solid(textureHandle, data[0], data[1], data[2], 1);
+        if (textureName != null) solidData.put(textureName, data);
         solid.numVerticesToRender = data[0].length;
         return solid;
     }

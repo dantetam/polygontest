@@ -117,6 +117,10 @@ public class Tile extends Representable implements Traversable<Tile> {
         return q == t.q && r == t.r;
     }
 
+    public int hashCode() {
+        return q*100 + r;
+    }
+
     public int compareX(Tile a, Tile b) {return a.q - b.q;}
     public int compareY(Tile a, Tile b) {return a.r - b.r;}
 
