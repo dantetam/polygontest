@@ -19,7 +19,7 @@ public class Entity extends Representable {
     }
 
     public void move(Tile t) {
-        if (t == null) {
+        if (t != null) {
             t.occupants.remove(this);
         }
         location = t;

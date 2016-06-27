@@ -3,6 +3,7 @@ package io.github.dantetam.opstrykontest;
 import android.opengl.GLES20;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.github.dantetam.world.*;
@@ -16,7 +17,9 @@ public class WorldHandler {
 
     public World world;
     public WorldGenerator worldGenerator;
+
     private Model tilesStored = null;
+    public HashMap<Tile.Biome, Solid> storedBiomeTiles;
 
     private LessonSevenActivity mActivity;
 
@@ -41,6 +44,7 @@ public class WorldHandler {
     public Model worldRep() {
         if (tilesStored == null) {
             tilesStored = new Model();
+            storedBiomeTiles = new HashMap<>();
             //tilesStored.add(generateHexes(world));
             for (int i = 0; i < Tile.Biome.numBiomes; i++) {
                 LessonSevenRenderer.Condition cond = new LessonSevenRenderer.Condition() {
@@ -67,6 +71,7 @@ public class WorldHandler {
 
                 //int textureHandle = TextureHelper.loadTexture("usb_android");
                 Solid solidsOfBiome = generateHexes(textureHandle, world, cond);
+                storedBiomeTiles.put(Tile.Biome.fromInt(i), solidsOfBiome);
                 tilesStored.add(solidsOfBiome);
                 //tilesStored.add(solidsOfBiome[0]);
                 //tilesStored.add(solidsOfBiome[1]);
@@ -140,16 +145,18 @@ public class WorldHandler {
         final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * numHexesToRender];
         int cubeTextureDataOffset = 0;
 
-        final float TRANSLATE_FACTOR = 3;
+        final float TRANSLATE_FACTORX = 3.3f;
+        final float TRANSLATE_FACTORZ = 4f;
 
         for (int x = 0; x < world.arrayLengthX; x++) {
             for (int z = 0; z < world.arrayLengthZ; z++) {
                 Tile tile = world.getTile(x,z);
                 if (tile == null) continue;
                 if (condition.allowed(tile)) {
-                    float extra = x % 2 == 1 ? TRANSLATE_FACTOR * -0.5f : 0;
+                    tile.elevation = 0;
+                    float extra = x % 2 == 1 ? TRANSLATE_FACTORZ * -0.5f : 0;
                     final float[] scaledData = scaleData(hexData[0], 1, tile.elevation / 5f, 1);
-                    final float[] thisCubePositionData = translateData(scaledData, x * TRANSLATE_FACTOR, tile.elevation / 10f, z * TRANSLATE_FACTOR + extra);
+                    final float[] thisCubePositionData = translateData(scaledData, x * TRANSLATE_FACTORX, tile.elevation / 10f, z * TRANSLATE_FACTORZ + extra);
 
                     System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
                     cubePositionDataOffset += thisCubePositionData.length;
