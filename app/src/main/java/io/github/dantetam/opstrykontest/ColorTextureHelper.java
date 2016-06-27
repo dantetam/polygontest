@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 
 /**
  * Created by Dante on 6/25/2016.
+ * Another helper class specifically to load bitmap of one RGB color
  */
 public class ColorTextureHelper {
 
@@ -15,11 +16,19 @@ public class ColorTextureHelper {
         context = c;
     }
 
+    /**
+     * @param r,g,b,a A color, 0-255
+     * @return The handle of a new generated texture
+     */
     public static int loadColor(int r, int g, int b, int a) {
         Bitmap bitmap = createColor(r, g, b, a);
         return TextureHelper.loadTexture("rgba/" + intFromColor(r, g, b, a), bitmap);
     }
 
+    /**
+     * @param color A float array in either RGB or RGBA format, and 0-1 or 0-255
+     * @return The handle of a new generated texture
+     */
     public static int loadColor(float[] color) {
         if (
                 color[0] > 0 && color[0] <= 1 &&
@@ -35,6 +44,12 @@ public class ColorTextureHelper {
         }
         return loadColor((int)color[0], (int)color[1], (int)color[2], (int)color[3]);
     }
+
+    /**
+     * Create a Bitmap for use in texture binding
+     * @param r,g,b,a A color in int form, 0-255
+     * @return A Bitmap which represents the color texture
+     */
     public static Bitmap createColor(int r, int g, int b, int a) {
         int rgba = intFromColor(r, g, b, a);
         return createColor(rgba);
@@ -54,6 +69,9 @@ public class ColorTextureHelper {
         return bitmap;
     }
 
+    /*
+    Convert an int color, 0-255, to ARGB form
+     */
     private static int intFromColor(int r, int g, int b, int a) {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }

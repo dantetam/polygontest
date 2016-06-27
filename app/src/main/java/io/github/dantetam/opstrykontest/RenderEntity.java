@@ -100,6 +100,15 @@ public abstract class RenderEntity {
         return cubeBuffer;
     }*/
 
+    /**
+     * Generated an interleaved VBO from the data, which contains n number of vertices, normal, and tex coords
+     * We defined interleaved to be [vertex1, normal1, tex1, vertex2, normal2, tex2, ... vertexn, normaln, textn)]
+     * @param cubePositions A set of vertices in triangles aligned in sets of POSITION_DATA_SIZE
+     * @param cubeNormals A set of normals (not normalized) aligned in sets of NORMAL_DATA_SIZE
+     * @param cubeTextureCoordinates A set of tex coords aligned in sets of TEXTURE_COORDINATE_DATA_SIZE
+     * @param generatedCubeFactor A factor to multiply the data by. This will generate generatedCubeFactor^2 copies of the given data.
+     * @return the new correctly sized, interleaved buffer which contains all the data.
+     */
     FloatBuffer getInterleavedBuffer(float[] cubePositions, float[] cubeNormals, float[] cubeTextureCoordinates, int generatedCubeFactor) {
         final int cubeDataLength = cubePositions.length
                 + (cubeNormals.length * generatedCubeFactor * generatedCubeFactor)

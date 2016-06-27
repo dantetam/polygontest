@@ -32,6 +32,12 @@ public class WorldHandler {
         this.mActivity = mActivity;
     }
 
+    /**
+     * This generates a new VBO for the world as its concrete representation if necessary,
+     * and returns it. The idea is that a new VBO should not be generated every time.
+     * TODO: Link tiles to positions? So that it is easy to add and remove model VBOs at certain tiles.
+     * @return The new VBO.
+     */
     public Model worldRep() {
         if (tilesStored == null) {
             tilesStored = new Model();
@@ -98,7 +104,19 @@ public class WorldHandler {
         return generateHexes(textureHandle, world, cond);
     }
 
+    //Store previously generated data in here.
     public float[][] tesselatedHexes;
+
+    /**
+     *
+     * @param textureHandle The texture for which this VBO will have
+     * @param world The world to represent
+     * @param condition Some sort of restriction, if necessary. In this case,
+     *                  we check that the tiles are of a certain biome.
+     *                  This is so that we render all tiles of the biome,
+     *                  under the same texture and VBO.
+     * @return A new solid which is a representation of the provided world
+     */
     private Solid generateHexes(int textureHandle, World world, LessonSevenRenderer.Condition condition) {
         float[][] hexData = ObjLoader.loadObjModelByVertex(mActivity, R.raw.hexagon);
 
@@ -150,6 +168,12 @@ public class WorldHandler {
         return hexes;
     }
 
+    /**
+     * @param data A piece of data "aligned" into vectors of three components
+     * @param dx,dy,dz A direction to translate in
+     * @return A new set of data where each x point (0, 3, 6...) is translated by dx,
+     * y (1, 4, 7...) by dy, and z (2, 5, 8...) by dz.
+     */
     private float[] translateData(float[] data, float dx, float dy, float dz) {
         float[] newData = new float[data.length];
         for (int i = 0; i < data.length; i++) {
@@ -160,6 +184,12 @@ public class WorldHandler {
         return newData;
     }
 
+    /**
+     * @param data A piece of data "aligned" into vectors of three components
+     * @param dx,dy,dz A vector to scale by
+     * @return A new set of data where each x point (0, 3, 6...) is scaled by dx,
+     * y (1, 4, 7...) by dy, and z (2, 5, 8...) by dz.
+     */
     private float[] scaleData(float[] data, float dx, float dy, float dz) {
         float[] newData = new float[data.length];
         for (int i = 0; i < data.length; i++) {
@@ -170,6 +200,10 @@ public class WorldHandler {
         return newData;
     }
 
+    /*
+    A convenience method for combining lists of objects,
+    used originally to combine solids together into one model.
+     */
     public List<Object> concat(List<Object> a, List<Object> b) {
         List<Object> combined = new ArrayList<Object>();
         for (Object o: a) combined.add(o);

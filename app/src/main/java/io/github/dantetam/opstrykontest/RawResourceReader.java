@@ -9,6 +9,9 @@ import android.content.Context;
 
 public class RawResourceReader
 {
+    /*
+    Return an entire string of data from an Android resource
+     */
 	public static String readTextFileFromRawResource(final Context context,
 			final int resourceId)
 	{

@@ -5,6 +5,10 @@ import java.util.List;
 
 /**
  * Created by Dante on 6/18/2016.
+ * This class is a wrapper class for a list of RenderEntity, which are VBOs.
+ * This class was originally intended to hold individual cubes and the like,
+ * but that approach was too computationally taxing on OpenGL ES,
+ * since data of hundreds of vertices had to be transmitted every frame.
  */
 public class Model {
 

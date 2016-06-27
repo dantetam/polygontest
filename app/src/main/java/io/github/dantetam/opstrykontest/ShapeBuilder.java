@@ -2,6 +2,12 @@ package io.github.dantetam.opstrykontest;
 
 public class ShapeBuilder 
 {
+    /**
+     * A legacy method. From the learn opengl es set of tutorials.
+     * @param point1,...,point8 A set of points aligned in a rectangular prism. Or something close enough.
+     * @param elementsPerPoint Size of the given data, in floats (not bytes)
+     * @return A new cubePositions[] (a set of vertices) which creates a cube in triangles.
+     */
 	public static float[] generateCubeData(float[] point1,
 			float[] point2,
 			float[] point3,

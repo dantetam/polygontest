@@ -4,10 +4,13 @@ import android.opengl.Matrix;
 
 /**
  * Created by Dante on 6/12/2016.
+ * Represents a camera with its own position, pointing towards another, oriented by the up vector
  */
 public class Camera {
 
+    //A view matrix that is recalculated if the data is changed
     private final float[] viewMatrix = new float[16];
+    //3 vectors, which align with the Android matrix class
     public float eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ;
 
     public Camera() {
@@ -22,11 +25,13 @@ public class Camera {
         Matrix.setLookAtM(viewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);
     }
 
+    /**
+     * Convenient bulk setter methods. Force update on viewMatrix;
+     */
     public void moveTo(float a, float b, float c) {
         eyeX = a; eyeY = b; eyeZ = c;
         setViewMatrix();
     }
-
     public void moveShift(float a, float b, float c) {
         eyeX += a; eyeY += b; eyeZ += c;
         setViewMatrix();
@@ -36,7 +41,6 @@ public class Camera {
         lookX = a; lookY = b; lookZ = c;
         setViewMatrix();
     }
-
     public void pointShift(float a, float b, float c) {
         lookX += a; lookY += b; lookZ += c;
         setViewMatrix();

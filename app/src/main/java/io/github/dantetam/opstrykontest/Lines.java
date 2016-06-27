@@ -9,6 +9,10 @@ import java.nio.FloatBuffer;
 /**
  * Created by Dante on 6/20/2016.
  * For wireframes.
+ * This class builds a buffer for a set of data, which is originally a set of triangles,
+ * which is converted into data that is intended to be rendered in lines, such that
+ * v1, v2, and v3 make a triangle, then it is rendered in lines (GLES20.GL_LINES)
+ * by the six vertices v1, v2, v2, v3, v3, v1.
  */
 public class Lines extends RenderEntity {
     public int mCubeBufferIdx = -1;

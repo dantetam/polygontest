@@ -22,6 +22,10 @@ import io.github.dantetam.world.World;
  * This class implements our custom renderer. Note that the GL10 parameter
  * passed in is unused for OpenGL ES 2.0 renderers -- the static class GLES20 is
  * used instead.
+ *
+ * This is the main entry point for the OpenGL program, and holds a WorldHandler,
+ * which connects graphics and the abstract world representation. This class is directly responsible
+ * for most rendering and render calls.
  */
 public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	/** Used for debug logs. */
@@ -115,7 +119,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
     public static final int WORLD_LENGTH = 8;
 
 	/**
-	 * Initialize the model data.
+	 * Initialize the model data. Initialize other necessary classes.
 	 */
 	public LessonSevenRenderer(final LessonSevenActivity lessonSevenActivity, final GLSurfaceView glSurfaceView) {
 		mLessonSevenActivity = lessonSevenActivity;	
@@ -133,6 +137,10 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mSingleThreadedExecutor.submit(new GenDataRunnable(cubeFactor));
 	}
 
+    /*
+    We use this class as a convenient way to impose lambda style statements
+    on some objects, and we guarantee the existence of the method allowed(Object obj).
+     */
     static abstract class Condition {
         abstract boolean allowed(Object obj);
         void init(int i) {}
@@ -258,6 +266,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		}
 	}	
 
+    /*
+    Initialize more data. Clean up the screen, move the camera, link shaders, load a few test textures.
+     */
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
 	{
@@ -353,12 +364,17 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
 	}
 
-	/** This will be used to pass in model position information. */
-	//public int mPositionHandle;
-	/** This will be used to pass in model normal information. */
-	//public int mNormalHandle;
-	/** This will be used to pass in model texture coordinate information. */
-	//public int mTextureCoordinateHandle;
+	/*
+	This method is the grand render method. It follows these steps:
+	Clear the screen
+	Generate world if necessary
+	Loop through all RenderEntity stored in the world representation
+	For each VBO rendered,
+	    Find the locations of its linked variables
+	    Pass in matrices of data such as the MVP matrix
+	    Bind the VBO's texture
+	    Render the VBO through its special render method
+	 */
 	@Override
 	public void onDrawFrame(GL10 glUnused) 
 	{		

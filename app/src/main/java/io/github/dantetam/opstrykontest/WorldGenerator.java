@@ -6,6 +6,8 @@ import io.github.dantetam.world.World;
 
 /**
  * Created by Dante on 6/17/2016.
+ * This is intended to be the site of all methods that generate data
+ * and affect the given world. It "latches" onto a world and then transforms it accordingly.
  */
 public class WorldGenerator {
 
@@ -15,6 +17,12 @@ public class WorldGenerator {
         world = w;
     }
 
+    /**
+     * Initialize the world (declared in constructor).
+     * This method should take in seeds that are not hard coded,
+     * generate an appropriately sized set of data, which is used to set features
+     * such as landscape, biome, etc.
+     */
     public void init() {
         int width = Math.max(world.arrayLengthX, world.arrayLengthZ);
         int[][] biomes = new DiamondSquare(width, 10, 0.4).seed(870).getIntTerrain(0, Tile.Biome.numBiomes - 1);
@@ -24,6 +32,10 @@ public class WorldGenerator {
         world.init(biomes, terrains, resources, elevations);
     }
 
+    /**
+     * @param rows,cols Size of world to be worked with
+     * @return a Tile.Resource[][]. We specifically work with Tile.Resource and not int, for convenience.
+     */
     private Tile.Resource[][] makeNewResources(int rows, int cols) {
         Tile.Resource[][] temp = new Tile.Resource[rows][cols];
         for (int r = 0; r < rows; r++) {

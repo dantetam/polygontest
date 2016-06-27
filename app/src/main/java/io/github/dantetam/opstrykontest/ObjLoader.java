@@ -11,8 +11,53 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+/*
+This class is from an old project inspired by ThinMatrix's OpenGL/LWJGL tutorials.
+It has been modified to use Android contexts and resources as a source of raw OBJ files,
+as opposed to filesystem resources in regular standard Java.
+
+It provides convenience methods for creating solids (VBOs) from resources directly,
+and contains two approaches: VBOs, and IBOs. TODO: Switch to index buffer objects.
+
+It provides simple vector class which wrap a few floats at a time.
+
+It parses through the format of a textured OBJ files containing vector normals.
+For a review, each OBJ is structured with vertices 1..n,
+
+v 1a 1b 1c
+v 2a 2b 2c
+...
+v na nb nc
+
+as well as vertex texture points also from 1..n, and normalized to 0..1, as such
+
+vt 1a 1b
+vt 2a 2b
+...
+
+and vertex normals from 1..n,
+
+vn 1a 1b 1c
+vn 2a 2b 2c
+
+This data is labelled and then combined through face objects, which have the format
+
+f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
+
+which represent polygons containing any number of vertices, which each vertex
+has an associated texture uv coordinate as well as a normal.
+
+All other data within the OBJ is ignored, for now.
+ */
 public class ObjLoader {
 
+    /**
+     * Parse an OBJ to create a solid
+     * @param textureHandle A textureHandle to bind to
+     * @param context An activity
+     * @param resourceId A resource "handle" such as R.drawable.usb_android (presumably an OBJ)
+     * @return A new Solid (a VBO) containing the data contained with the resource
+     */
     public static Solid loadSolid(int textureHandle,
                                   final Context context,
                                   final int resourceId)
@@ -32,12 +77,26 @@ public class ObjLoader {
         return loadSolid(textureHandle, data);
     }
 
+    /**
+     * Parse an OBJ to create a solid, but this time, manually from float[] data,
+     * in VNT form.
+     * @param textureHandle A textureHandle to bind to
+     * @param data
+     * @return A new Solid (a VBO) containing the data contained with the resource
+     */
     public static Solid loadSolid(int textureHandle, float[][] data) {
         Solid solid = new Solid(textureHandle, data[0], data[1], data[2], 1);
         solid.numVerticesToRender = data[0].length;
         return solid;
     }
 
+    /**
+     * Load float[] data, in VNTI form. Intended for IBOs.
+     * This method loads from the specified resource all the data directly and does no other computation.
+     * @param context An activity
+     * @param resourceId A resource "handle" such as R.drawable.usb_android (presumably an OBJ)
+     * @return an array of float[][] containing vertices, normal, texture coords, and indices respectively
+     */
     public static float[][] loadObjModelByIndex(final Context context,
         final int resourceId)
     {
@@ -139,6 +198,16 @@ public class ObjLoader {
         return new float[][]{verticesArray, normalsArray, textureArray, indicesArray};
     }
 
+    /**
+     * Load float[] data, in VNT form. Intended for VBOs.
+     * Note that the vertices are generated already from the faces.
+     * This method loads from the specified resource all the vertices, normal, and tex coords.
+     * It then compiles them in interleaved groups, where are each face
+     * is a set of three triplets of a vertex, a texture and a normal.
+     * @param context An activity
+     * @param resourceId A resource "handle" such as R.drawable.usb_android (presumably an OBJ)
+     * @return an array of float[][] containing vertices, normal, and texture coords respectively
+     */
     public static float[][] loadObjModelByVertex(final Context context,
                                                 final int resourceId)
     {
@@ -252,6 +321,11 @@ public class ObjLoader {
         return new float[][]{verticesArray, normalsArray, textureArray};
     }
 
+    /*
+    This is a helper method that specifically takes in a string
+    "v/vt/vn" split into its parts, and adds the data correctly into the given lists.
+    Since the vertices follow the convention 1..n, we shift to follow 0..n-1
+     */
     private static void processVertex(
             String[] vertex,
             ArrayList<Vector3f> vertices,
@@ -265,6 +339,9 @@ public class ObjLoader {
         allNormals.add(normals.get(Integer.parseInt(vertex[2]) - 1));
     }
 
+    /*
+    Same as the previous methods but this one is intended for IBOs.
+     */
     private static void processVertex(
             String[] vertexData,
             ArrayList<Integer> indices,
@@ -286,6 +363,9 @@ public class ObjLoader {
         normalsArray[currentVertex*3 + 2] = currentNorm.z;
     }
 
+    /*
+    Some helper classes to conveniently wrap two and three floats
+     */
     public static class Vector2f {
         public float x,y;
         public Vector2f(float a, float b) {x = a; y = b;}
