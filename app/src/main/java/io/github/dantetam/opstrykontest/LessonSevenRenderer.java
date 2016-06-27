@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.res.AssetManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -64,8 +65,9 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	/** 
 	 * Stores a copy of the model matrix specifically for the light position.
 	 */
-	private float[] mLightModelMatrix = new float[16];		
-	
+	private float[] mLightModelMatrix = new float[16];
+
+    public AssetManager assetManager;
     /** Pass in data to shaders by OpenGL handles */
     private int mProgramHandle;
     private int mAndroidDataHandle;
@@ -122,11 +124,12 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	 * Initialize the model data. Initialize other necessary classes.
 	 */
 	public LessonSevenRenderer(final LessonSevenActivity lessonSevenActivity, final GLSurfaceView glSurfaceView) {
-		mLessonSevenActivity = lessonSevenActivity;	
+		mLessonSevenActivity = lessonSevenActivity;
+        assetManager = mLessonSevenActivity.getAssets();
 		mGlSurfaceView = glSurfaceView;
         mGlSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
-        worldHandler = new WorldHandler(mLessonSevenActivity, WORLD_LENGTH, WORLD_LENGTH);
+        worldHandler = new WorldHandler(mLessonSevenActivity, assetManager, WORLD_LENGTH, WORLD_LENGTH);
         ColorTextureHelper.init(mLessonSevenActivity);
         //world = new World(WORLD_LENGTH, WORLD_LENGTH);
         //worldGenerator = new WorldGenerator(world);

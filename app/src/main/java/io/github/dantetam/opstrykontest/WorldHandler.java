@@ -1,7 +1,9 @@
 package io.github.dantetam.opstrykontest;
 
+import android.content.res.AssetManager;
 import android.opengl.GLES20;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,8 @@ public class WorldHandler {
     public World world;
     public WorldGenerator worldGenerator;
 
+    private AssetManager assetManager;
+
     private Model tilesStored = null;
     public HashMap<Tile.Biome, Solid> storedBiomeTiles;
 
@@ -32,11 +36,12 @@ public class WorldHandler {
     static final int TEXTURE_COORDINATE_DATA_SIZE = 2;
     static final int BYTES_PER_FLOAT = 4;
 
-    public WorldHandler(LessonSevenActivity mActivity, int len1, int len2) {
+    public WorldHandler(LessonSevenActivity mActivity, AssetManager assetManager, int len1, int len2) {
         world = new World(len1, len2);
         worldGenerator = new WorldGenerator(world);
         worldGenerator.init();
         this.mActivity = mActivity;
+        this.assetManager = assetManager;
     }
 
     /**
@@ -96,7 +101,12 @@ public class WorldHandler {
         }
         for (Tile tile: tiles) {
             if (tile.improvement != null) {
-                Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, "improvements/" + tile.improvement.name);
+                try {
+                    Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, assetManager.open(tile.improvement.name + ".obj"));
+                } catch (IOException e) {
+                    System.err.println("Could not find model '" + tile.improvement.name + ".obj' in assets");
+                    e.printStackTrace();
+                }
             }
         }
         return improvementsStored;

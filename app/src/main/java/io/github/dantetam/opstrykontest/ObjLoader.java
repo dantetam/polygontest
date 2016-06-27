@@ -61,6 +61,13 @@ public class ObjLoader {
         return null;
     }
 
+    public static Solid loadSolid(int textureHandle, String textureName, InputStream assetInputStream) {
+        final InputStreamReader inputStreamReader = new InputStreamReader(assetInputStream);
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+        return loadSolid(textureHandle, textureName, readFloatDataByVertex(bufferedReader));
+    }
+
     /**
      * Parse an OBJ to create a solid
      * @param textureHandle A textureHandle to bind to
@@ -238,10 +245,20 @@ public class ObjLoader {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
+        return readFloatDataByVertex(bufferedReader);
+    }
+
+    /*
+    This is a convenience method to stop code duplication.
+    This reads from any correctly formatted BufferedReader, which is either from
+    an InputStream from the activity's resources, or
+    an InputStream from the activity's assets
+    (the new second approach since Assets can be read by file names).
+     */
+    private static float[][] readFloatDataByVertex(BufferedReader reader) {
         String nextLine;
         final StringBuilder body = new StringBuilder();
 
-        BufferedReader reader = new BufferedReader(inputStreamReader);
         String line;
         ArrayList<Vector3f> vertices = new ArrayList<Vector3f>();
         ArrayList<Vector2f> textures = new ArrayList<Vector2f>();
