@@ -14,7 +14,7 @@ public class Model {
         parts = new ArrayList<RenderEntity>();
     }
 
-    public void add(Solid solid) {
+    public void add(RenderEntity solid) {
         parts.add(solid);
     }
 

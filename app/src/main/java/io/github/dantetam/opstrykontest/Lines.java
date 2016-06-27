@@ -36,6 +36,8 @@ public class Lines extends RenderEntity {
     /** How many bytes per float. */
     static final int BYTES_PER_FLOAT = 4;
 
+    public final int renderMode = GLES20.GL_LINES;
+
     public final float[] width = new float[3];
     public final float[] color = new float[4];
 

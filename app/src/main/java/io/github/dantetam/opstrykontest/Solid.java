@@ -12,16 +12,6 @@ import java.nio.FloatBuffer;
 public class Solid extends RenderEntity {
     public int mCubeBufferIdx = -1;
 
-    /** This will be used to pass in model position information. */
-    public int mPositionHandle;
-
-    /** This will be used to pass in model normal information. */
-    public int mNormalHandle;
-
-    /** This will be used to pass in model texture coordinate information. */
-    public int mTextureCoordinateHandle;
-
-    public int textureHandle;
     public int strokeTextureHandle;
 
     public int generatedCubeFactor;
@@ -30,6 +20,8 @@ public class Solid extends RenderEntity {
     public final float[] size = new float[3];
     public final float[] rotation = new float[4];
     public final float[] color = new float[4];
+
+    public final int renderMode = GLES20.GL_TRIANGLES;
 
     public Solid(int textureHandle) {
         this(textureHandle, defaultCubePos(), defaultCubeNormals(), defaultCubeTexture(), 1);

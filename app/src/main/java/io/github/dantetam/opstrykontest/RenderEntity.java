@@ -1,5 +1,7 @@
 package io.github.dantetam.opstrykontest;
 
+import android.opengl.GLES20;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -20,6 +22,19 @@ public abstract class RenderEntity {
 
     /** How many bytes per float. */
     static final int BYTES_PER_FLOAT = 4;
+
+    /** This will be used to pass in model position information. */
+    public int mPositionHandle;
+
+    /** This will be used to pass in model normal information. */
+    public int mNormalHandle;
+
+    /** This will be used to pass in model texture coordinate information. */
+    public int mTextureCoordinateHandle;
+
+    public int textureHandle;
+
+    public final int renderMode = GLES20.GL_TRIANGLES;
 
     abstract void renderAll();
     abstract void renderAll(int mode);

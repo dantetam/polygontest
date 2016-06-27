@@ -372,6 +372,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             //mCubes = new Model();
             mCubes = worldHandler.worldRep();
             mLines = new Lines(mWhiteTextureHandle, worldHandler.tesselatedHexes[0], worldHandler.tesselatedHexes[1], worldHandler.tesselatedHexes[2]);
+            mCubes.add(mLines);
             //mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
             //mCubes.add(worldHandler.generateHexes());
             return;
@@ -381,7 +382,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             return;*/
         }
         for (int i = 0; i < mCubes.parts.size(); i++) {
-            Solid solid = mCubes.parts.get(i);
+            RenderEntity solid = mCubes.parts.get(i);
             //int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
             //int y = (i / mActualCubeFactor) % mActualCubeFactor;
             //int z = i % mActualCubeFactor;
@@ -472,20 +473,8 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
             //---
-            GLES20.glEnable(GLES20.GL_POLYGON_OFFSET_FILL);
-            GLES20.glPolygonOffset(2.0f, 2.0f);
-
             if (mCubes != null) {
-                //solid.renderAll(GLES20.GL_TRIANGLES);
-            }
-
-            GLES20.glDisable(GLES20.GL_POLYGON_OFFSET_FILL);
-            GLES20.glLineWidth(1.0f);
-
-            if (mCubes != null) {
-                //solid.renderAll(GLES20.GL_LINES);
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mLines.textureHandle);
-                mLines.renderAll();
+                solid.renderAll(solid.renderMode);
             }
             //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }
