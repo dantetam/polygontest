@@ -13,6 +13,7 @@ public class Tile extends Representable implements Traversable<Tile> {
     public int elevation;
     public Biome biome; //combined climate of land
     public Terrain terrain; //shape of the land
+    public Building improvement;
     public List<Resource> resources;
     public List<Entity> occupants;
 

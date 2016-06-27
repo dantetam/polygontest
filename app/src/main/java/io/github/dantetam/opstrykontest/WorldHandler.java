@@ -95,7 +95,9 @@ public class WorldHandler {
             improvementsStored = new Model();
         }
         for (Tile tile: tiles) {
-            
+            if (tile.improvement != null) {
+                Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, "improvements/" + tile.improvement.name);
+            }
         }
         return improvementsStored;
     }
@@ -196,7 +198,7 @@ public class WorldHandler {
         }
 
         tesselatedHexes = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
-        Solid hexes = ObjLoader.loadSolid(textureHandle, tesselatedHexes);
+        Solid hexes = ObjLoader.loadSolid(textureHandle, null, tesselatedHexes);
         return hexes;
     }
 

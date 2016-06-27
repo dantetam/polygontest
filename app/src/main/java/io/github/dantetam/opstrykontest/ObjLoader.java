@@ -54,9 +54,17 @@ public class ObjLoader {
 
     public static HashMap<String, float[][]> solidData = new HashMap<>();
 
+    public static Solid loadSolid(int textureHandle, String textureName) {
+        if (textureName != null && solidData.containsKey(textureName)) {
+            return loadSolid(textureHandle, null, solidData.get(textureName));
+        }
+        return null;
+    }
+
     /**
      * Parse an OBJ to create a solid
      * @param textureHandle A textureHandle to bind to
+     * @param textureName A name to save the solid data to if necessary
      * @param context An activity
      * @param resourceId A resource "handle" such as R.drawable.usb_android (presumably an OBJ)
      * @return A new Solid (a VBO) containing the data contained with the resource
@@ -66,7 +74,7 @@ public class ObjLoader {
                                   final Context context,
                                   final int resourceId)
     {
-        if (solidData.containsKey(textureName)) {
+        if (textureName != null && solidData.containsKey(textureName)) {
             return loadSolid(textureHandle, null, solidData.get(textureName));
         }
         float[][] data = loadObjModelByVertex(context, resourceId);
@@ -83,6 +91,12 @@ public class ObjLoader {
             System.out.println();
         }*/
         return loadSolid(textureHandle, textureName, data);
+    }
+    public static Solid loadSolid(int textureHandle,
+                                  final Context context,
+                                  final int resourceId)
+    {
+        return loadSolid(textureHandle, null, context, resourceId);
     }
 
     /**
