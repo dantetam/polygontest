@@ -103,7 +103,27 @@ public class WorldHandler {
         for (Tile tile: tiles) {
             if (tile.improvement != null) {
                 try {
-                    Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, tile.improvement.buildingType.name, assetManager.open(tile.improvement.name + ".obj"));
+                    //Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, tile.improvement.buildingType.name, assetManager.open(tile.improvement.name + ".obj"));
+                    float[][] objData = ObjLoader.loadObjModelByVertex(assetManager.open(tile.improvement.name + ".obj"));
+
+                    final float[] totalCubePositionData = new float[objData[0].length];
+                    final float[] totalNormalPositionData = new float[objData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE];
+                    final float[] totalTexturePositionData = new float[objData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE];
+
+                    float[] vertices = storedTileVertexPositions.get(tile);
+
+                    final float[] scaledData = scaleData(objData[0], 0.2f, 0.2f, 0.2f);
+                    storedTileVertexPositions.put(tile, vertices);
+
+                    final float[] thisCubePositionData = translateData(scaledData, vertices[0], vertices[1], vertices[2]);
+                    System.arraycopy(thisCubePositionData, 0, totalCubePositionData, 0, thisCubePositionData.length);
+
+                    System.arraycopy(objData[1], 0, totalNormalPositionData, 0, objData[1].length);
+                    System.arraycopy(objData[2], 0, totalTexturePositionData, 0, objData[2].length);
+
+                    float[][] improvementData = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+                    Solid improvement = ObjLoader.loadSolid(TextureHelper.loadTexture("usb_android", mActivity, R.drawable.usb_android), null, improvementData);
+
                     storedTileImprovements.put(tile, improvement);
                 } catch (IOException e) {
                     System.err.println("Could not find model '" + tile.improvement.name + ".obj' in assets");
@@ -159,7 +179,7 @@ public class WorldHandler {
      *                  under the same texture and VBO.
      * @return A new solid which is a representation of the provided world
      */
-    private Solid generateHexes(int textureHandle, World world, LessonSevenRenderer.Condition condition) {
+    /*private Solid generateImprovements(int textureHandle, World world, LessonSevenRenderer.Condition condition) {
         float[][] hexData = ObjLoader.loadObjModelByVertex(mActivity, R.raw.hexagon);
 
         //int mRequestedCubeFactor = WORLD_LENGTH;
@@ -200,6 +220,81 @@ public class WorldHandler {
 
                     final float[] thisCubePositionData = translateData(scaledData, vertices[0], vertices[1]/2f, vertices[2]);
 
+                    System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
+                    cubePositionDataOffset += thisCubePositionData.length;
+
+                    System.arraycopy(hexData[1], 0, totalNormalPositionData, cubeNormalDataOffset, hexData[1].length);
+                    cubeNormalDataOffset += hexData[1].length;
+                    System.arraycopy(hexData[2], 0, totalTexturePositionData, cubeTextureDataOffset, hexData[2].length);
+                    cubeTextureDataOffset += hexData[2].length;
+                }
+            }
+            //}
+        }
+
+        tesselatedHexes = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+        Solid hexes = ObjLoader.loadSolid(textureHandle, null, tesselatedHexes);
+        return hexes;
+    }*/
+
+    /**
+     *
+     * @param textureHandle The texture for which this VBO will have
+     * @param world The world to represent
+     * @param condition Some sort of restriction, if necessary. In this case,
+     *                  we check that the tiles are of a certain biome.
+     *                  This is so that we render all tiles of the biome,
+     *                  under the same texture and VBO.
+     * @return A new solid which is a representation of the provided world
+     */
+    private Solid generateHexes(int textureHandle, World world, LessonSevenRenderer.Condition condition) {
+        //Load the vtn data of one hex obj
+        float[][] hexData = ObjLoader.loadObjModelByVertex(mActivity, R.raw.hexagon);
+
+        //int mRequestedCubeFactor = WORLD_LENGTH;
+
+        //Count the number of hexes needed so that the correct space is allocated
+        int numHexesToRender = 0;
+        for (int x = 0; x < world.arrayLengthX; x++) {
+            for (int z = 0; z < world.arrayLengthZ; z++) {
+                Tile tile = world.getTile(x,z);
+                if (tile == null) continue;
+                if (condition.allowed(tile)) {
+                    numHexesToRender++;
+                }
+            }
+        }
+
+        //Create some appropriately sized tables which will store preliminary buffer data
+        //Combine them all within these pieces of data.
+        final float[] totalCubePositionData = new float[hexData[0].length * numHexesToRender];
+        int cubePositionDataOffset = 0;
+        final float[] totalNormalPositionData = new float[hexData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE * numHexesToRender];
+        int cubeNormalDataOffset = 0;
+        final float[] totalTexturePositionData = new float[hexData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE * numHexesToRender];
+        int cubeTextureDataOffset = 0;
+
+        final float TRANSLATE_FACTORX = 3.3f;
+        final float TRANSLATE_FACTORZ = 4f;
+
+        for (int x = 0; x < world.arrayLengthX; x++) {
+            for (int z = 0; z < world.arrayLengthZ; z++) {
+                Tile tile = world.getTile(x,z);
+                if (tile == null) continue;
+                if (condition.allowed(tile)) {
+                    tile.elevation = 0;
+
+                    //Scale and translate accordingly so everything fits together
+                    float extra = x % 2 == 1 ? TRANSLATE_FACTORZ * -0.5f : 0;
+                    final float[] scaledData = scaleData(hexData[0], 1, tile.elevation / 5f, 1);
+
+                    //Store these positions for later use when we place tile improvements and such
+                    float[] vertices = {x * TRANSLATE_FACTORX, tile.elevation / 5f, z * TRANSLATE_FACTORZ + extra};
+                    storedTileVertexPositions.put(tile, vertices);
+
+                    final float[] thisCubePositionData = translateData(scaledData, vertices[0], vertices[1]/2f, vertices[2]);
+
+                    //Interleave all the new vtn data, per hex.
                     System.arraycopy(thisCubePositionData, 0, totalCubePositionData, cubePositionDataOffset, thisCubePositionData.length);
                     cubePositionDataOffset += thisCubePositionData.length;
 
