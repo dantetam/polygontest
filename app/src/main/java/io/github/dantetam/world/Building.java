@@ -8,10 +8,14 @@ import java.util.HashMap;
 public class Building extends Entity {
 
     public enum BuildingType {
-        WHEAT_PLOT (0),
-        SHALLOW_MINE (1);
-        public int id;
-        BuildingType(int t) {id = t;}
+        //WHEAT_PLOT (0, "Wheat Plot"),
+        //SHALLOW_MINE (1, "Shallow Mine");
+        FARM1 (0, "Farm1"),
+        FARM2 (1, "Farm2"),
+        FARM3 (2, "Farm3"),
+        FARM4 (3, "Farm4");
+        public int id; public String name;
+        BuildingType(int t, String n) {id = t; name = n;}
         private static BuildingType[] rawTypes = BuildingType.class.getEnumConstants();
         public static HashMap<Integer, BuildingType> types = null;
         public static BuildingType fromInt(int n) {
@@ -22,6 +26,9 @@ public class Building extends Entity {
                 return types.get(n);
             }
             throw new IllegalArgumentException("Invalid terrain type: " + n);
+        }
+        public String objResourceName() {
+            return name.toLowerCase().replaceAll(" ", "_");
         }
         private static void init() {
             types = new HashMap<>();
@@ -34,10 +41,19 @@ public class Building extends Entity {
             if (numBuildingTypes == 0) init();
             return types.size();
         }
+        public static BuildingType randomBuilding() {
+            return BuildingType.fromInt((int) (Math.random() * numBuildingTypes));
+        }
     }
 
-    public Building() {
+    public BuildingType buildingType;
 
+    public Building() {
+        super();
+    }
+
+    public Building(Tile t) {
+        super(t);
     }
 
 }

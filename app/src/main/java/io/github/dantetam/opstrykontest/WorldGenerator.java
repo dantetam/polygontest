@@ -1,5 +1,8 @@
 package io.github.dantetam.opstrykontest;
 
+import java.util.List;
+
+import io.github.dantetam.world.Building;
 import io.github.dantetam.world.DiamondSquare;
 import io.github.dantetam.world.Tile;
 import io.github.dantetam.world.World;
@@ -30,6 +33,7 @@ public class WorldGenerator {
         Tile.Resource[][] resources = makeNewResources(width, width);
         int[][] elevations = new DiamondSquare(width, 10, 0.5).seed(916).getIntTerrain(1, 10);
         world.init(biomes, terrains, resources, elevations);
+        makeRandomBuildings();
     }
 
     /**
@@ -51,6 +55,18 @@ public class WorldGenerator {
             }
         }
         return temp;
+    }
+
+    /*
+    Initialize some buildings to the tiles for testing purposes.
+     */
+    private void makeRandomBuildings() {
+        List<Tile> tiles = world.getAllValidTiles();
+        for (Tile tile: tiles) {
+            if (Math.random() < 0.3) {
+                new Building(tile);
+            }
+        }
     }
 
 }

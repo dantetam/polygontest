@@ -18,6 +18,11 @@ public class Entity extends Representable {
         items = new ArrayList<Item>();
     }
 
+    public Entity(Tile t) {
+        this();
+        move(t);
+    }
+
     public void move(Tile t) {
         if (t != null) {
             t.occupants.remove(this);

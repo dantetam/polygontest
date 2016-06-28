@@ -96,18 +96,23 @@ public class WorldHandler {
     }
 
     public Model updateTileImprovement(List<Tile> tiles) {
-        if (improvementsStored == null) {
+        /*if (improvementsStored == null) {
             improvementsStored = new Model();
-        }
+        }*/
+        improvementsStored = new Model();
         for (Tile tile: tiles) {
             if (tile.improvement != null) {
                 try {
-                    Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, assetManager.open(tile.improvement.name + ".obj"));
+                    Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, tile.improvement.buildingType.name, assetManager.open(tile.improvement.name + ".obj"));
+                    storedTileImprovements.put(tile, improvement);
                 } catch (IOException e) {
                     System.err.println("Could not find model '" + tile.improvement.name + ".obj' in assets");
                     e.printStackTrace();
                 }
             }
+        }
+        for (Solid solid: storedTileImprovements.values()) {
+            improvementsStored.add(solid);
         }
         return improvementsStored;
     }

@@ -15,17 +15,21 @@ public class World {
     public int totalX, totalZ;
     private int numHexes = -1;
 
+    private List<Tile> validTiles;
+
     //x represents height, z represents length
     public World(int q, int r) {
         //tree = new WorldTree();
         hexes = new Tile[r][q + r/2];
+        validTiles = new ArrayList<Tile>();
         this.totalX = q; this.totalZ = r;
         this.arrayLengthX = r; this.arrayLengthZ = q + r/2;
-        int startingZ = q + r/2 - 1;
+        int startingZ = arrayLengthZ - 1;
         numHexes = 0;
-        for (int x = 0; x < r; x++) {
+        for (int x = 0; x < arrayLengthX; x++) {
             for (int z = startingZ; z >= startingZ - r; z--) {
                 hexes[x][z] = new Tile(this, x, z);
+                validTiles.add(hexes[x][z]);
                 numHexes++;
             }
             if (x % 2 == 1) {
@@ -64,6 +68,22 @@ public class World {
             return null;
         }
         return hexes[r][c];
+    }
+
+    public List<Tile> getAllValidTiles() {
+        /*List<Tile> tiles = new ArrayList<Tile>();
+        int startingZ = arrayLengthZ - 1;
+        for (int x = 0; x < arrayLengthX; x++) {
+            for (int z = startingZ; z >= startingZ - arrayLengthX; z--) {
+                Tile tile = hexes[x][z];
+                if (tile != null) tiles.add(tile);
+            }
+            if (x % 2 == 1) {
+                startingZ--;
+            }
+        }
+        return tiles;*/
+        return validTiles;
     }
 
     public static final int[][] neighborDirections = {

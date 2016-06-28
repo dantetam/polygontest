@@ -242,6 +242,10 @@ public class ObjLoader {
                                                 final int resourceId)
     {
         final InputStream inputStream = context.getResources().openRawResource(resourceId);
+        return loadObjModelByVertex(inputStream);
+    }
+    public static float[][] loadObjModelByVertex(final InputStream inputStream)
+    {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
