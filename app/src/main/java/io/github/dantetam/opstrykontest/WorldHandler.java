@@ -20,7 +20,7 @@ public class WorldHandler {
     public World world;
     public WorldGenerator worldGenerator;
 
-    private AssetManager assetManager;
+    private AssetHelper assetHelper;
 
     private Model tilesStored = null;
     public HashMap<Tile.Biome, Solid> storedBiomeTiles;
@@ -36,12 +36,12 @@ public class WorldHandler {
     static final int TEXTURE_COORDINATE_DATA_SIZE = 2;
     static final int BYTES_PER_FLOAT = 4;
 
-    public WorldHandler(LessonSevenActivity mActivity, AssetManager assetManager, int len1, int len2) {
+    public WorldHandler(LessonSevenActivity mActivity, AssetHelper assetHelper, int len1, int len2) {
         world = new World(len1, len2);
         worldGenerator = new WorldGenerator(world);
         worldGenerator.init();
         this.mActivity = mActivity;
-        this.assetManager = assetManager;
+        this.assetHelper = assetHelper;
     }
 
     /**
@@ -92,6 +92,8 @@ public class WorldHandler {
     }
 
     public Model tileImprovementRep() {
+        if (improvementsStored == null)
+            updateTileImprovement(world.getAllValidTiles());
         return improvementsStored;
     }
 
@@ -99,40 +101,42 @@ public class WorldHandler {
         /*if (improvementsStored == null) {
             improvementsStored = new Model();
         }*/
-        improvementsStored = new Model();
-        for (Tile tile: tiles) {
-            if (tile.improvement != null) {
-                try {
-                    //Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, tile.improvement.buildingType.name, assetManager.open(tile.improvement.name + ".obj"));
-                    float[][] objData = ObjLoader.loadObjModelByVertex(assetManager.open(tile.improvement.name + ".obj"));
+        if (improvementsStored == null) {
+            improvementsStored = new Model();
+            for (Tile tile : tiles) {
+                if (tile != null && tile.improvement != null) {
+                    try {
+                        //Solid improvement = ObjLoader.loadSolid(R.drawable.usb_android, tile.improvement.buildingType.name, assetManager.open(tile.improvement.name + ".obj"));
+                        float[][] objData = assetHelper.loadVertexFromAssets(tile.improvement.name + ".obj");
 
-                    final float[] totalCubePositionData = new float[objData[0].length];
-                    final float[] totalNormalPositionData = new float[objData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE];
-                    final float[] totalTexturePositionData = new float[objData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE];
+                        final float[] totalCubePositionData = new float[objData[0].length];
+                        final float[] totalNormalPositionData = new float[objData[0].length / POSITION_DATA_SIZE * NORMAL_DATA_SIZE];
+                        final float[] totalTexturePositionData = new float[objData[0].length / POSITION_DATA_SIZE * TEXTURE_COORDINATE_DATA_SIZE];
 
-                    float[] vertices = storedTileVertexPositions.get(tile);
+                        float[] vertices = storedTileVertexPositions.get(tile);
 
-                    final float[] scaledData = scaleData(objData[0], 0.2f, 0.2f, 0.2f);
-                    storedTileVertexPositions.put(tile, vertices);
+                        final float[] scaledData = scaleData(objData[0], 0.2f, 0.2f, 0.2f);
+                        storedTileVertexPositions.put(tile, vertices);
 
-                    final float[] thisCubePositionData = translateData(scaledData, vertices[0], vertices[1], vertices[2]);
-                    System.arraycopy(thisCubePositionData, 0, totalCubePositionData, 0, thisCubePositionData.length);
+                        final float[] thisCubePositionData = translateData(scaledData, vertices[0], vertices[1], vertices[2]);
+                        System.arraycopy(thisCubePositionData, 0, totalCubePositionData, 0, thisCubePositionData.length);
 
-                    System.arraycopy(objData[1], 0, totalNormalPositionData, 0, objData[1].length);
-                    System.arraycopy(objData[2], 0, totalTexturePositionData, 0, objData[2].length);
+                        System.arraycopy(objData[1], 0, totalNormalPositionData, 0, objData[1].length);
+                        System.arraycopy(objData[2], 0, totalTexturePositionData, 0, objData[2].length);
 
-                    float[][] improvementData = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
-                    Solid improvement = ObjLoader.loadSolid(TextureHelper.loadTexture("usb_android", mActivity, R.drawable.usb_android), null, improvementData);
+                        float[][] improvementData = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+                        Solid improvement = ObjLoader.loadSolid(TextureHelper.loadTexture("usb_android", mActivity, R.drawable.usb_android), null, improvementData);
 
-                    storedTileImprovements.put(tile, improvement);
-                } catch (IOException e) {
-                    System.err.println("Could not find model '" + tile.improvement.name + ".obj' in assets");
-                    e.printStackTrace();
+                        storedTileImprovements.put(tile, improvement);
+                    } catch (IOException e) {
+                        System.err.println("Could not find model '" + tile.improvement.name + ".obj' in assets");
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
-        for (Solid solid: storedTileImprovements.values()) {
-            improvementsStored.add(solid);
+            for (Solid solid : storedTileImprovements.values()) {
+                improvementsStored.add(solid);
+            }
         }
         return improvementsStored;
     }

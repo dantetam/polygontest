@@ -4,6 +4,8 @@ import java.util.Random;
 
 /**
  * Created by Dante on 6/17/2016.
+ * This is intended as a class to make arbitrarily sized pieces of terrain data.
+ * TODO: Import interpolation from past project
  */
 public class DiamondSquare {
 

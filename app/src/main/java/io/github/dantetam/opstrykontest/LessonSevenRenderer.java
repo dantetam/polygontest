@@ -113,6 +113,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	private final ExecutorService mSingleThreadedExecutor = Executors.newSingleThreadExecutor();
 
 	private Model mCubes;
+    private Model improvements;
     private Lines mLines;
 
 	public Camera camera;
@@ -386,10 +387,11 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mViewMatrix = camera.getViewMatrix();
 
 		//for (int i = 0; i < mCubes.parts.size(); i++) {
-        if (mCubes == null || mCubes.parts.size() == 0) {
+        if (mCubes == null || improvements == null || mCubes.parts.size() == 0) {
             //generateCubes(mActualCubeFactor);
             //mCubes = new Model();
             mCubes = worldHandler.worldRep();
+            improvements = worldHandler.tileImprovementRep();
             mLines = new Lines(mWhiteTextureHandle, worldHandler.tesselatedHexes[0], worldHandler.tesselatedHexes[1], worldHandler.tesselatedHexes[2]);
             mCubes.add(mLines);
             //mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
@@ -400,8 +402,13 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             System.out.println("Render1");
             return;*/
         }
-        for (int i = 0; i < mCubes.parts.size(); i++) {
-            RenderEntity solid = mCubes.parts.get(i);
+        renderModel(mCubes);
+        renderModel(improvements);
+	}
+
+    private void renderModel(Model model) {
+        for (int i = 0; i < model.parts.size(); i++) {
+            RenderEntity solid = model.parts.get(i);
             //int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
             //int y = (i / mActualCubeFactor) % mActualCubeFactor;
             //int z = i % mActualCubeFactor;
@@ -492,12 +499,11 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
             //---
-            if (mCubes != null) {
+            if (model != null) {
                 solid.renderAll(solid.renderMode);
             }
             //GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }
-
-	}
+    }
 
 }

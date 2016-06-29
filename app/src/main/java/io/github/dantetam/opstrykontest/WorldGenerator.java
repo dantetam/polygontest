@@ -63,8 +63,10 @@ public class WorldGenerator {
     private void makeRandomBuildings() {
         List<Tile> tiles = world.getAllValidTiles();
         for (Tile tile: tiles) {
-            if (Math.random() < 0.3) {
-                new Building(tile);
+            if (Math.random() < 0.3 && tile != null) {
+                Building building = new Building(tile, Building.BuildingType.randomBuilding());
+                //building.buildingType = Building.BuildingType.randomBuilding();
+                //building.move(tile);
             }
         }
     }

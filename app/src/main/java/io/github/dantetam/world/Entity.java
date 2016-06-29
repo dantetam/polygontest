@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class Entity extends Representable {
 
-    private Tile location;
+    protected Tile location;
     public String name;
     public Clan clan;
     public List<Item> items;
