@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.github.dantetam.terrain.TerrainGenerator;
 import io.github.dantetam.world.*;
 
 /**
@@ -20,7 +21,7 @@ public class WorldHandler {
     public World world;
     public WorldGenerator worldGenerator;
 
-    private AssetHelper assetHelper;
+    //private AssetHelper assetHelper;
 
     private Model tilesStored = null;
     public HashMap<Tile.Biome, Solid> storedBiomeTiles;
@@ -29,6 +30,8 @@ public class WorldHandler {
     public HashMap<Tile, Solid> storedTileImprovements;
     public Model improvementsStored;
 
+    public Model terrainTestStored;
+
     private LessonSevenActivity mActivity;
 
     static final int POSITION_DATA_SIZE = 3;
@@ -36,12 +39,11 @@ public class WorldHandler {
     static final int TEXTURE_COORDINATE_DATA_SIZE = 2;
     static final int BYTES_PER_FLOAT = 4;
 
-    public WorldHandler(LessonSevenActivity mActivity, AssetHelper assetHelper, int len1, int len2) {
+    public WorldHandler(LessonSevenActivity mActivity, int len1, int len2) {
         world = new World(len1, len2);
         worldGenerator = new WorldGenerator(world);
         worldGenerator.init();
         this.mActivity = mActivity;
-        this.assetHelper = assetHelper;
     }
 
     /**
@@ -101,7 +103,7 @@ public class WorldHandler {
         /*if (improvementsStored == null) {
             improvementsStored = new Model();
         }*/
-        if (improvementsStored == null) {
+        /*if (improvementsStored == null) {
             improvementsStored = new Model();
             for (Tile tile : tiles) {
                 if (tile != null && tile.improvement != null) {
@@ -137,7 +139,7 @@ public class WorldHandler {
             for (Solid solid : storedTileImprovements.values()) {
                 improvementsStored.add(solid);
             }
-        }
+        }*/
         return improvementsStored;
     }
 
@@ -314,6 +316,38 @@ public class WorldHandler {
         tesselatedHexes = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
         Solid hexes = ObjLoader.loadSolid(textureHandle, null, tesselatedHexes);
         return hexes;
+    }
+
+    public Model generateTerrainTest() {
+        if (terrainTestStored == null) {
+            terrainTestStored = new Model();
+            TerrainGenerator generator = new TerrainGenerator(16, 1f);
+
+            float[] totalCubePositionData = new float[generator.hexes.size() * 12 * 3];
+            float[] totalNormalPositionData = new float[generator.hexes.size() * 12 * 3];
+            float[] totalTexturePositionData = new float[generator.hexes.size() * 12 * 2];
+
+            float[] normal = new float[36];
+            float[] defaultNormal = {0, 1, 0};
+            for (int i = 0; i < 12; i++) {
+                System.arraycopy(defaultNormal, 0, normal, i * 3, 3);
+            }
+
+            int i = 0;
+            for (TerrainGenerator.Polygon hex: generator.hexes) {
+                float[][] hexData = hex.getHexagonData();
+                System.arraycopy(hexData[0], 0, totalCubePositionData, i * 12 * 3, 12 * 3);
+                System.arraycopy(normal, 0, totalNormalPositionData, i * 12 * 3, 12 * 3);
+                System.arraycopy(hexData[1], 0, totalTexturePositionData, i * 12 * 2, 12 * 2);
+                i++;
+            }
+
+            float[][] hexData = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+            int textureHandle = TextureHelper.loadTexture("usb_android", mActivity, R.drawable.usb_android);
+            Solid hexes = ObjLoader.loadSolid(textureHandle, null, hexData);
+            terrainTestStored.add(hexes);
+        }
+        return terrainTestStored;
     }
 
     /**

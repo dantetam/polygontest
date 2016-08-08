@@ -115,6 +115,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 	private Model mCubes;
     private Model improvements;
     private Lines mLines;
+    private Model terrainTest;
 
 	public Camera camera;
 
@@ -130,7 +131,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mGlSurfaceView = glSurfaceView;
         mGlSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 8);
 
-        worldHandler = new WorldHandler(mLessonSevenActivity, assetManager, WORLD_LENGTH, WORLD_LENGTH);
+        worldHandler = new WorldHandler(mLessonSevenActivity, WORLD_LENGTH, WORLD_LENGTH);
         ColorTextureHelper.init(mLessonSevenActivity);
         //world = new World(WORLD_LENGTH, WORLD_LENGTH);
         //worldGenerator = new WorldGenerator(world);
@@ -387,13 +388,14 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		mViewMatrix = camera.getViewMatrix();
 
 		//for (int i = 0; i < mCubes.parts.size(); i++) {
-        if (mCubes == null || improvements == null || mCubes.parts.size() == 0) {
+        if (mCubes == null || mCubes.parts.size() == 0) {
             //generateCubes(mActualCubeFactor);
             //mCubes = new Model();
             mCubes = worldHandler.worldRep();
             improvements = worldHandler.tileImprovementRep();
             mLines = new Lines(mWhiteTextureHandle, worldHandler.tesselatedHexes[0], worldHandler.tesselatedHexes[1], worldHandler.tesselatedHexes[2]);
             mCubes.add(mLines);
+            terrainTest = worldHandler.generateTerrainTest();
             //mCubes.add(ObjLoader.loadSolid(mLessonSevenActivity, R.raw.hexagon));
             //mCubes.add(worldHandler.generateHexes());
             return;
@@ -404,11 +406,14 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
         }
         renderModel(mCubes);
         renderModel(improvements);
+        renderModel(terrainTest);
 	}
 
     private void renderModel(Model model) {
+        if (model == null) return;
         for (int i = 0; i < model.parts.size(); i++) {
             RenderEntity solid = model.parts.get(i);
+            if (solid == null) continue;
             //int x = (i / (mActualCubeFactor * mActualCubeFactor)) % mActualCubeFactor;
             //int y = (i / mActualCubeFactor) % mActualCubeFactor;
             //int z = i % mActualCubeFactor;
