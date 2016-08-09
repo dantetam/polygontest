@@ -76,6 +76,10 @@ public class TerrainGenerator {
         return results;
     }
 
+    public class EdgeGroup {
+
+    }
+
     public class Edge {
         private Point edge0, edge1;
         public float slope;
