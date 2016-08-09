@@ -21,9 +21,8 @@ public class TerrainGenerator {
         for (int i = 0; i < len; i++) {
             for (int j = 0; j < len; j++) {
                 float x = scale*i*0.5f, y = scale*j*0.75f;
-                if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) y -= scale*0.125f;
-                else y += scale*0.125f;
-                //if (j % 2 == 1) x -= scale*1f;
+                if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) x -= scale*0.125f;
+                else x += scale*0.125f;
                 allPoints[i][j] = new Point(x, y, 0);
                 allPoints[i][j].texData = new float[]{x / (scale*0.5f*len), y / (scale*0.75f*len)};
             }
@@ -144,18 +143,21 @@ public class TerrainGenerator {
 
         public float[][] getHexagonData() {
             int[] indices = {5, 1, 0, 4, 1, 5, 4, 2, 1, 4, 3, 2};
+            //int[] indices = {0, 1, 2, 3, 4, 5};
+
             float[] vertices = new float[indices.length * 3];
+
             for (int i = 0; i < indices.length; i++) {
                 Point vertex = points.get(indices[i]);
-                vertices[3*i] = vertex.x;
-                vertices[3*i + 1] = vertex.y;
+                vertices[3*i] = vertex.y;
+                vertices[3*i + 1] = vertex.x;
                 vertices[3*i + 2] = vertex.z;
             }
             float[] textures = new float[indices.length * 2];
             for (int i = 0; i < indices.length; i++) {
                 Point vertex = points.get(indices[i]);
-                vertices[2*i] = vertex.texData[0];
-                vertices[2*i + 1] = vertex.texData[1];
+                textures[2*i] = vertex.texData[0];
+                textures[2*i + 1] = vertex.texData[1];
             }
             return new float[][]{vertices, textures};
         }

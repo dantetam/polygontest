@@ -1,5 +1,6 @@
 package io.github.dantetam.opstrykontest;
 
+import android.content.SyncAdapterType;
 import android.content.res.AssetManager;
 import android.opengl.GLES20;
 
@@ -323,28 +324,44 @@ public class WorldHandler {
             terrainTestStored = new Model();
             TerrainGenerator generator = new TerrainGenerator(16, 1f);
 
-            float[] totalCubePositionData = new float[generator.hexes.size() * 12 * 3];
-            float[] totalNormalPositionData = new float[generator.hexes.size() * 12 * 3];
-            float[] totalTexturePositionData = new float[generator.hexes.size() * 12 * 2];
+            float[][] firstHexData = generator.hexes.get(0).getHexagonData();
 
-            float[] normal = new float[36];
+            float[] totalCubePositionData = new float[generator.hexes.size() * firstHexData[0].length];
+            float[] totalNormalPositionData = new float[generator.hexes.size() * firstHexData[0].length];
+            float[] totalTexturePositionData = new float[generator.hexes.size() * firstHexData[1].length];
+
+            float[] normal = new float[firstHexData[0].length];
             float[] defaultNormal = {0, 1, 0};
-            for (int i = 0; i < 12; i++) {
+            for (int i = 0; i < firstHexData[0].length / 3; i++) {
                 System.arraycopy(defaultNormal, 0, normal, i * 3, 3);
             }
 
             int i = 0;
             for (TerrainGenerator.Polygon hex: generator.hexes) {
                 float[][] hexData = hex.getHexagonData();
-                System.arraycopy(hexData[0], 0, totalCubePositionData, i * 12 * 3, 12 * 3);
-                System.arraycopy(normal, 0, totalNormalPositionData, i * 12 * 3, 12 * 3);
-                System.arraycopy(hexData[1], 0, totalTexturePositionData, i * 12 * 2, 12 * 2);
+
+                /*for (int j = 0; j < hexData[0].length; j++) {
+                    System.out.print(hexData[0][j] + " ");
+                    if (j % 3 == 2) System.out.print("; ");
+                }
+                System.out.println();*/
+
+                System.arraycopy(hexData[0], 0, totalCubePositionData, i * hexData[0].length, hexData[0].length);
+                System.arraycopy(normal, 0, totalNormalPositionData, i * hexData[0].length, hexData[0].length);
+                System.arraycopy(hexData[1], 0, totalTexturePositionData, i * hexData[1].length, hexData[1].length);
                 i++;
+
+                /*for (int j = 0; j < totalCubePositionData.length; j++) {
+                    System.out.print(totalCubePositionData[j] + " ");
+                    if (j % 3 == 2) System.out.print("; ");
+                }
+                System.out.println();
+                System.out.println("---");*/
             }
 
-            float[][] hexData = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
+            float[][] totalHexData = new float[][]{totalCubePositionData, totalNormalPositionData, totalTexturePositionData};
             int textureHandle = TextureHelper.loadTexture("usb_android", mActivity, R.drawable.usb_android);
-            Solid hexes = ObjLoader.loadSolid(textureHandle, null, hexData);
+            Solid hexes = ObjLoader.loadSolid(textureHandle, null, totalHexData);
             terrainTestStored.add(hexes);
         }
         return terrainTestStored;

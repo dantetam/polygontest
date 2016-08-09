@@ -286,7 +286,7 @@ public class LessonSevenRenderer implements GLSurfaceView.Renderer {
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		
 		// Use culling to remove back faces.
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		//GLES20.glEnable(GLES20.GL_CULL_FACE);
 		
 		// Enable depth testing
 		GLES20.glEnable(GLES20.GL_DEPTH_TEST);

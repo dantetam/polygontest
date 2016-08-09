@@ -42,10 +42,10 @@ public class LessonSevenGLSurfaceView extends GLSurfaceView
 					float deltaX = (x - mPreviousX) / mDensity / 2f;
 					float deltaY = (y - mPreviousY) / mDensity / 2f;
 					
-					//mRenderer.mDeltaX += deltaX;
-					//mRenderer.mDeltaY += deltaY;
-					mRenderer.camera.moveShift(-deltaX/10, 0, -deltaY/10);
-					mRenderer.camera.pointShift(-deltaX/10, 0, -deltaY/10);
+					mRenderer.mDeltaX += deltaX;
+					mRenderer.mDeltaY += deltaY;
+					//mRenderer.camera.moveShift(-deltaX/10, 0, -deltaY/10);
+					//mRenderer.camera.pointShift(-deltaX/10, 0, -deltaY/10);
 				}
 			}	
 			
