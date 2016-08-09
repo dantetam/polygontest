@@ -1,5 +1,7 @@
 package io.github.dantetam.terrain;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class TerrainGenerator {
         }
         for (int r = 0; r < len - 2; r += 2) {
             for (int c = 0; c < len - 2; c += 2) {
-                List<Point> hex = new ArrayList<>();
+                PointList hex = new PointList();
                 hex.add(allPoints[r][c]);
                 hex.add(allPoints[r][c + 1]);
                 hex.add(allPoints[r][c + 2]);
@@ -41,7 +43,7 @@ public class TerrainGenerator {
         }
         for (int r = 1; r < len - 2; r += 2) {
             for (int c = 1; c < len - 2; c += 2) {
-                List<Point> hex = new ArrayList<>();
+                PointList hex = new PointList();
                 hex.add(allPoints[r][c]);
                 hex.add(allPoints[r][c + 1]);
                 hex.add(allPoints[r][c + 2]);
@@ -115,27 +117,16 @@ public class TerrainGenerator {
         }
     }
 
-    public class Point {
-        public float x,y,z;
-        public float[] texData;
-        public Point(float a, float b, float c) {
-            x = a; y = b; z = c;
-            texData = new float[2];
-        }
-        public float dist(Point p) {
-            return (float) Math.sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y) + (z - p.z)*(z - p.z));
-        }
-        public Point add(Point p) {
-            return new Point(x + p.x, y + p.y, z + p.z);
-        }
-    }
+    //Work around type erasure for generics.
+    public class PointList extends ArrayList<Point> {}
+    public class EdgeList extends ArrayList<Edge> {}
 
     public class Polygon {
         public List<Polygon> neighbors;
         public List<Point> points;
         public List<Edge> edges;
 
-        public Polygon(List<Point> createFromPoints) {
+        public Polygon(PointList createFromPoints) {
             neighbors = new ArrayList<>();
             points = createFromPoints;
             edges = new ArrayList<>();
@@ -143,6 +134,37 @@ public class TerrainGenerator {
                 edges.add(new Edge(points.get(i), points.get(i + 1)));
             }
             edges.add(new Edge(points.get(points.size() - 1), points.get(0)));
+        }
+
+        public Polygon(EdgeList createFromEdges) {
+            neighbors = new ArrayList<>();
+            edges = createFromEdges;
+            points = new ArrayList<>();
+            for (Edge edge: edges) {
+                points.add(edge.edge0());
+            }
+        }
+
+        public float[][] getVertexData() {
+            List<Point> twoDimensionPoints = new ArrayList<>();
+            for (Point point: points) {
+                twoDimensionPoints.add(point);
+            }
+            List<Point> result = Triangulate.process(twoDimensionPoints);
+            float[] vertices = new float[result.size() * 3];
+            for (int i = 0; i < result.size(); i++) {
+                Point vertex = result.get(i);
+                vertices[3*i] = vertex.y;
+                vertices[3*i + 1] = vertex.x;
+                vertices[3*i + 2] = 0;
+            }
+            float[] textures = new float[result.size() * 2];
+            for (int i = 0; i < result.size(); i++) {
+                Point vertex = result.get(i);
+                textures[2*i] = vertex.texData[0];
+                textures[2*i + 1] = vertex.texData[1];
+            }
+            return new float[][]{vertices, textures};
         }
 
         public float[][] getHexagonData() {
