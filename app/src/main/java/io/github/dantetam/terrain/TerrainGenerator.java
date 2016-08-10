@@ -12,6 +12,7 @@ public class TerrainGenerator {
 
     public Point[][] allPoints;
     public List<Polygon> hexes;
+    public EdgeInterface[][] allEdges;
 
     public TerrainGenerator(int len, float scale) {
         hexagonProcess(len, scale);
@@ -25,34 +26,54 @@ public class TerrainGenerator {
                 float x = scale*i*0.75f, y = scale*j*0.5f;
                 if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) x -= scale*0.125f;
                 else x += scale*0.125f;
-                x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
-                y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
+                /*x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
+                y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;*/
                 allPoints[i][j] = new Point(x, y, 0);
                 allPoints[i][j].texData = new float[]{x / (scale*0.5f*len), y / (scale*0.75f*len)};
             }
         }
+        /*for (int r = 0; r < len - 2; r += 2) {
+            for (int c = 0; c < len - 2; c += 2) {
+                allEdges[r][c] = new EdgeSingle(allPoints[r][c], allPoints[r][c + 1]);
+                allEdges[r][c + 1] = new EdgeSingle(allPoints[r][c + 1], allPoints[r][c + 2]);
+            }
+        }
+        for (int r = 1; r < len - 2; r += 2) {
+            if (r % 4 == 1) {
+                for (int c = 0; c < len - 2; c += 2) {
+                    allEdges[r][c] = new EdgeSingle(allPoints[r][c], allPoints[r][c + 1]);
+                    allEdges[r][c + 1] = new EdgeSingle(allPoints[r][c + 1], allPoints[r][c + 2]);
+                }
+            }
+            else {
+                for (int c = 1; c < len - 2; c += 2) {
+                    allEdges[r][c] = new EdgeSingle(allPoints[r][c], allPoints[r][c + 1]);
+                    allEdges[r][c + 1] = new EdgeSingle(allPoints[r][c + 1], allPoints[r][c + 2]);
+                }
+            }
+        }*/
         for (int r = 0; r < len - 2; r += 2) {
             for (int c = 0; c < len - 2; c += 2) {
-                /*PointList hex = new PointList();
+                PointList hex = new PointList();
                 hex.add(allPoints[r][c]);
                 hex.add(allPoints[r][c + 1]);
                 hex.add(allPoints[r][c + 2]);
                 hex.add(allPoints[r + 1][c + 2]);
                 hex.add(allPoints[r + 1][c + 1]);
                 hex.add(allPoints[r + 1][c]);
-                hexes.add(new Polygon(hex));*/
+                hexes.add(new Polygon(hex));
             }
         }
         for (int r = 1; r < len - 2; r += 2) {
             for (int c = 1; c < len - 2; c += 2) {
-                /*PointList hex = new PointList();
+                PointList hex = new PointList();
                 hex.add(allPoints[r][c]);
                 hex.add(allPoints[r][c + 1]);
                 hex.add(allPoints[r][c + 2]);
                 hex.add(allPoints[r + 1][c + 2]);
                 hex.add(allPoints[r + 1][c + 1]);
                 hex.add(allPoints[r + 1][c]);
-                hexes.add(new Polygon(hex));*/
+                hexes.add(new Polygon(hex));
             }
         }
     }
@@ -93,9 +114,13 @@ public class TerrainGenerator {
         }
     }*/
 
-    public class EdgeGroup implements EdgeInterface {
+    public class EdgeGroup extends EdgeSingle {
         public List<EdgeSingle> edges;
         public List<Point> points;
+        public EdgeGroup(Point p0, Point p1) {
+            super(p0, p1);
+            throw new IllegalArgumentException("Cannot use this constructor, possibly EdgeSingle?");
+        }
         public EdgeGroup(List<EdgeSingle> edges) {
             this.edges = edges;
             points = new ArrayList<>();
@@ -108,7 +133,7 @@ public class TerrainGenerator {
         }
     }
 
-    public class EdgeSingle implements EdgeInterface {
+    public class Edge implements EdgeInterface {
         private Point edge0, edge1;
         public float slope;
         public EdgeSingle(Point p0, Point p1) {
@@ -149,12 +174,12 @@ public class TerrainGenerator {
     }
 
     public interface EdgeInterface {
-        abstract Object getPointsInOrder();
+        Object getPointsInOrder();
     }
 
     //Work around type erasure for generics.
     public class PointList extends ArrayList<Point> {}
-    public class EdgeList extends ArrayList<EdgeSingle> {}
+    public class EdgeList extends ArrayList<EdgeInterface> {}
 
     public class Polygon {
         public List<Polygon> neighbors;
@@ -184,6 +209,12 @@ public class TerrainGenerator {
         public void setEdges(EdgeList list) {
             edges = list;
             findPoints();
+        }
+
+        public void roughMutateAllValidEdges() {
+            for (EdgeInterface edge: edges) {
+
+            }
         }
 
         private void findPoints() {
