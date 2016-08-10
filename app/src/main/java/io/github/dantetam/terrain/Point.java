@@ -22,6 +22,9 @@ public class Point {
     public String toString() {
         return "(Point: " + x + ", " + y + ", " + z + ")";
     }
+    /*public String toString(int c) {
+        return "vertex(" + (int)(x*100f) + ", " + (int)(y*100f) + ");"; //"strokeWeight(" + c + ",0,0);" +
+    }*/
     public boolean equals(Object obj) {
         if (!(obj instanceof Point)) {
             return false;

@@ -109,6 +109,13 @@ public class Triangulate {
             }
         }
 
+        int i = 0;
+        for (Point p: contour) {
+            System.out.print(p.toString(i) + " ");
+            i++;
+        }
+        System.out.println("--------");
+
         List<Point> result = new ArrayList<>();
 
         int n = contour.size();

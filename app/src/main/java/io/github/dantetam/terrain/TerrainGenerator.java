@@ -25,6 +25,9 @@ public class TerrainGenerator {
             for (int j = 0; j < len; j++) {
                 float x = scale*i*0.75f, y = scale*j*0.5f;
                 if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) x -= scale*0.125f;
+
+                x += 1;
+                y += 1;
                 //else x += scale*0.125f;
                 //x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
                 //y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
@@ -81,7 +84,7 @@ public class TerrainGenerator {
         }
     }
 
-    public static int SEGMENTS = 16, SAMPLE_SEGMENT = 4;
+    public static int SEGMENTS = 16, SAMPLE_SEGMENT = 10;
     public List<Edge> roughEdge(Edge edge) {
         float[] newEdgeData = new PerlinNoiseLine(870).generatePerlinLine(SEGMENTS, 0.5f, 0.25f);
         //float slope = edge.slope();
@@ -89,6 +92,9 @@ public class TerrainGenerator {
         float angle = (float) Math.atan(normalSlope);
         //float len = edge.length();
         List<Point> points = new ArrayList<>();
+
+        System.out.println(edge.edge0 + " " + edge.edge1);
+
         for (int i = SAMPLE_SEGMENT / 2; i < SEGMENTS; i += SAMPLE_SEGMENT) {
             float mid = (float) i / (float) SEGMENTS;
             Point between = edge.inBetween(mid);
@@ -258,12 +264,6 @@ public class TerrainGenerator {
                     edge.roughMutate();
                 }
             }
-            for (Edge edge: edges) {
-                for (Point p: edge.getPoints()) {
-                    System.out.print(p.toString() + " ");
-                }
-            }
-            System.out.println();
         }
 
         //Collate all points from edges, which may be single sides or a set of sides
