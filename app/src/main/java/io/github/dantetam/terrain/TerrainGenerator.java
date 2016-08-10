@@ -22,41 +22,43 @@ public class TerrainGenerator {
         hexes = new ArrayList<>();
         for (int i = 0; i < len; i++) {
             for (int j = 0; j < len; j++) {
-                float x = scale*i*0.5f, y = scale*j*0.75f;
+                float x = scale*i*0.75f, y = scale*j*0.5f;
                 if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) x -= scale*0.125f;
                 else x += scale*0.125f;
+                x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
+                y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
                 allPoints[i][j] = new Point(x, y, 0);
                 allPoints[i][j].texData = new float[]{x / (scale*0.5f*len), y / (scale*0.75f*len)};
             }
         }
         for (int r = 0; r < len - 2; r += 2) {
             for (int c = 0; c < len - 2; c += 2) {
-                PointList hex = new PointList();
+                /*PointList hex = new PointList();
                 hex.add(allPoints[r][c]);
                 hex.add(allPoints[r][c + 1]);
                 hex.add(allPoints[r][c + 2]);
                 hex.add(allPoints[r + 1][c + 2]);
                 hex.add(allPoints[r + 1][c + 1]);
                 hex.add(allPoints[r + 1][c]);
-                hexes.add(new Polygon(hex));
+                hexes.add(new Polygon(hex));*/
             }
         }
         for (int r = 1; r < len - 2; r += 2) {
             for (int c = 1; c < len - 2; c += 2) {
-                PointList hex = new PointList();
+                /*PointList hex = new PointList();
                 hex.add(allPoints[r][c]);
                 hex.add(allPoints[r][c + 1]);
                 hex.add(allPoints[r][c + 2]);
                 hex.add(allPoints[r + 1][c + 2]);
                 hex.add(allPoints[r + 1][c + 1]);
                 hex.add(allPoints[r + 1][c]);
-                hexes.add(new Polygon(hex));
+                hexes.add(new Polygon(hex));*/
             }
         }
     }
 
     public static int SEGMENTS = 16, SAMPLE_SEGMENT = 4;
-    public List<Edge> roughEdge(Edge edge) {
+    public EdgeGroup roughEdge(EdgeSingle edge) {
         float[] newEdgeData = new PerlinNoiseLine(870).generatePerlinLine(SEGMENTS, 0.5f, 0.25f);
         //float slope = edge.slope();
         float normalSlope = - 1f / edge.slope();
@@ -71,21 +73,45 @@ public class TerrainGenerator {
         }
         points.add(0, edge.edge0());
         points.add(edge.edge1());
-        List<Edge> results = new ArrayList<>();
+        List<EdgeSingle> results = new ArrayList<>();
         for (int i = 0; i < points.size() - 1; i++) {
-            results.add(new Edge(points.get(i), points.get(i + 1)));
+            results.add(new EdgeSingle(points.get(i), points.get(i + 1)));
         }
-        return results;
+        return new EdgeGroup(results);
     }
 
-    public class EdgeGroup {
+    /*public void addRoughEdges(Polygon polygon) {
+        EdgeList edges = polygon.getEdges();
+        List<EdgeGroup> newEdgeReplacements = new ArrayList<>();
+        for (EdgeInterface edge: edges) {
+            if (edge instanceof EdgeSingle) {
+                newEdgeReplacements = roughEdge()
+            }
+            else {
+                throw new IllegalArgumentException("Attempting to subdivide a group of edges within an edge (requires EdgeSingle)");
+            }
+        }
+    }*/
 
+    public class EdgeGroup implements EdgeInterface {
+        public List<EdgeSingle> edges;
+        public List<Point> points;
+        public EdgeGroup(List<EdgeSingle> edges) {
+            this.edges = edges;
+            points = new ArrayList<>();
+            for (EdgeSingle edge: edges) {
+                points.add(edge.edge0);
+            }
+        }
+        public Object getPointsInOrder() {
+            return points;
+        }
     }
 
-    public class Edge {
+    public class EdgeSingle implements EdgeInterface {
         private Point edge0, edge1;
         public float slope;
-        public Edge(Point p0, Point p1) {
+        public EdgeSingle(Point p0, Point p1) {
             if (p0.x < p1.x) {
                 edge0 = p0;
                 edge1 = p1;
@@ -115,37 +141,69 @@ public class TerrainGenerator {
             float offZ = (edge1.z - edge0.z) * percent;
             return new Point(edge0.x + offX, edge1.y + offY, edge0.z + offZ);
         }
+        public Object getPointsInOrder() {
+            List<Point> points = new ArrayList<>();
+            points.add(edge0);
+            return points;
+        }
+    }
+
+    public interface EdgeInterface {
+        abstract Object getPointsInOrder();
     }
 
     //Work around type erasure for generics.
     public class PointList extends ArrayList<Point> {}
-    public class EdgeList extends ArrayList<Edge> {}
+    public class EdgeList extends ArrayList<EdgeSingle> {}
 
     public class Polygon {
         public List<Polygon> neighbors;
         public List<Point> points;
-        public List<Edge> edges;
+        private EdgeList edges;
 
         public Polygon(PointList createFromPoints) {
             neighbors = new ArrayList<>();
             points = createFromPoints;
-            edges = new ArrayList<>();
+            edges = new EdgeList();
             for (int i = 0; i < points.size() - 1; i++) {
-                edges.add(new Edge(points.get(i), points.get(i + 1)));
+                edges.add(new EdgeSingle(points.get(i), points.get(i + 1)));
             }
-            edges.add(new Edge(points.get(points.size() - 1), points.get(0)));
+            edges.add(new EdgeSingle(points.get(points.size() - 1), points.get(0)));
         }
 
         public Polygon(EdgeList createFromEdges) {
             neighbors = new ArrayList<>();
             edges = createFromEdges;
+            findPoints();
+        }
+
+        public EdgeList getEdges() {
+            return edges;
+        }
+
+        public void setEdges(EdgeList list) {
+            edges = list;
+            findPoints();
+        }
+
+        private void findPoints() {
             points = new ArrayList<>();
-            for (Edge edge: edges) {
-                points.add(edge.edge0());
+            for (EdgeInterface edge: edges) {
+                if (edge instanceof EdgeSingle) {
+                    points.add(((EdgeSingle)edge).edge0());
+                }
+                else {
+                    EdgeGroup group = (EdgeGroup) edge;
+                    for (EdgeSingle childEdge: group.edges) {
+                        points.add(childEdge.edge0());
+                    }
+                }
             }
         }
 
         public float[][] getVertexData() {
+            findPoints();
+
             List<Point> twoDimensionPoints = new ArrayList<>();
             for (Point point: points) {
                 twoDimensionPoints.add(point);
