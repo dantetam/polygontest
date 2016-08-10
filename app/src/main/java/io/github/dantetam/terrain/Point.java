@@ -19,4 +19,14 @@ public class Point {
     public Point add(Point p) {
         return new Point(x + p.x, y + p.y, z + p.z);
     }
+    public String toString() {
+        return "(Point: " + x + ", " + y + ", " + z + ")";
+    }
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Point)) {
+            return false;
+        }
+        Point p = (Point) obj;
+        return x == p.x && y == p.y && z == p.z;
+    }
 }

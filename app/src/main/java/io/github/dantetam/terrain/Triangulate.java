@@ -1,5 +1,7 @@
 package io.github.dantetam.terrain;
 
+import android.content.SyncAdapterType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -24,8 +26,8 @@ public class Triangulate {
     /** whatever your own Vector implementation might be.           **/
     /*****************************************************************/
 
-    //static float EPSILON = 0.0000000001f;
-    static float EPSILON = 0.0000001f;
+    static float EPSILON = 0.0000000001f;
+    //static float EPSILON = 0.0000001f;
 
     public static float area(List<Point> contour) {
         int n = contour.size();
@@ -80,7 +82,7 @@ public class Triangulate {
         Cx = contour.get(V[w]).x;
         Cy = contour.get(V[w]).y;
 
-        if (EPSILON > (((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax)))) return false;
+        if ((((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax))) < EPSILON) return false;
 
         for (p = 0; p < n; p++) {
             if ((p == u) || (p == v) || (p == w)) continue;
@@ -95,6 +97,18 @@ public class Triangulate {
     public static List<Point> process(List<Point> contour) {
         /* allocate and initialize list of Vertices in polygon */
 
+        for (Point p: contour) {
+            int matches = 0;
+            for (Point q: contour) {
+                if (p.equals(q)) {
+                    matches++;
+                }
+            }
+            if (matches > 1) {
+                System.out.println("Duplicate point!");
+            }
+        }
+
         List<Point> result = new ArrayList<>();
 
         int n = contour.size();
@@ -104,7 +118,7 @@ public class Triangulate {
 
         /* we want a counter-clockwise polygon in V */
 
-        if (0.0f < area(contour))
+        if (area(contour) > 0.0f)
             for (int v = 0; v < n; v++) V[v] = v;
         else
             for (int v = 0; v < n; v++) V[v] = (n - 1) - v;
@@ -117,7 +131,7 @@ public class Triangulate {
         for (int m = 0, v = nv - 1; nv > 2; ) {
         /* if we loop, it is probably a non-simple polygon */
             if (0 >= (count--)) {
-                //** Triangulate: ERROR - probable bad polygon!
+                System.out.println("Triangulate: ERROR - probable bad polygon!");
                 return null;
             }
 
@@ -174,7 +188,7 @@ public class Triangulate {
 
         List<Point> a = new ArrayList<>();
 
-        a.add(new Point(0, 6));
+        /*a.add(new Point(0, 6));
         a.add(new Point(0, 0));
         a.add(new Point(3, 0));
         a.add(new Point(4, 1));
@@ -188,7 +202,15 @@ public class Triangulate {
         a.add(new Point(11, 6));
         a.add(new Point(6, 6));
         a.add(new Point(4, 3));
-        a.add(new Point(2, 6));
+        a.add(new Point(2, 6));*/
+
+        a.add(new Point(0, 0));
+        a.add(new Point(0, 2));
+        a.add(new Point(0, 4));
+        a.add(new Point(1, 4));
+        a.add(new Point(1, 2));
+        a.add(new Point(2, 2));
+        a.add(new Point(2, 0));
 
         // allocate an STL vector to hold the answer.
 
@@ -206,6 +228,8 @@ public class Triangulate {
             Point p3 = result.get(i * 3 + 2);
             System.out.println("Triangle: " + p1.toString() + "; " + p2.toString() + "; " + p3.toString());
         }
+
+        System.exit(0);
     }
 
 }

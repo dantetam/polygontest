@@ -25,7 +25,7 @@ public class TerrainGenerator {
             for (int j = 0; j < len; j++) {
                 float x = scale*i*0.75f, y = scale*j*0.5f;
                 if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) x -= scale*0.125f;
-                else x += scale*0.125f;
+                //else x += scale*0.125f;
                 //x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
                 //y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
                 allPoints[i][j] = new Point(x, y, 0);
@@ -76,9 +76,9 @@ public class TerrainGenerator {
                 hexes.add(new Polygon(hex));
             }
         }
-        /*for (Polygon hex: hexes) {
+        for (Polygon hex: hexes) {
             hex.roughMutateAllValidEdges();
-        }*/
+        }
     }
 
     public static int SEGMENTS = 16, SAMPLE_SEGMENT = 4;
@@ -92,6 +92,7 @@ public class TerrainGenerator {
         for (int i = SAMPLE_SEGMENT / 2; i < SEGMENTS; i += SAMPLE_SEGMENT) {
             float mid = (float) i / (float) SEGMENTS;
             Point between = edge.inBetween(mid);
+            newEdgeData[i] = Math.abs(newEdgeData[i]);
             Point newPoint = between.add(new Point(newEdgeData[i]*(float)Math.cos(angle), newEdgeData[i]*(float)Math.sin(angle), 0));
             points.add(newPoint);
         }
@@ -101,6 +102,7 @@ public class TerrainGenerator {
         for (int i = 0; i < points.size() - 1; i++) {
             results.add(new Edge(points.get(i), points.get(i + 1)));
         }
+        //results.add(new Edge(points.get(points.size() - 1), points.get(0)));
         return results;
         //return new EdgeGroup(results);
     }
@@ -174,6 +176,8 @@ public class TerrainGenerator {
             else {
                 slope = (edge1.y - edge0.y) / (edge0.x - edge1.x);
             }
+            edge0 = p0;
+            edge1 = p1;
         }
         /*public Edge(List<Edge> list) {
             childEdges = list;
@@ -188,10 +192,19 @@ public class TerrainGenerator {
             return edge0.dist(edge1);
         }
         public Point inBetween(float percent) {
-            float offX = (edge1.x - edge0.x) * percent;
-            float offY = (edge1.y - edge0.y) * percent;
-            float offZ = (edge1.z - edge0.z) * percent;
-            return new Point(edge0.x + offX, edge1.y + offY, edge0.z + offZ);
+            float offX, offY, offZ;
+            if (edge0.x < edge1.x) {
+                offX = (edge1.x - edge0.x) * percent;
+                offY = (edge1.y - edge0.y) * percent;
+                offZ = (edge1.z - edge0.z) * percent;
+                return new Point(edge0.x + offX, edge0.y + offY, edge0.z + offZ);
+            }
+            else {
+                offX = (edge1.x - edge0.x) * percent;
+                offY = (edge1.y - edge0.y) * percent;
+                offZ = (edge1.z - edge0.z) * percent;
+                return new Point(edge0.x - offX, edge0.y - offY, edge0.z - offZ);
+            }
         }
         /*public Object getPointsInOrder() {
             List<Point> points = new ArrayList<>();
@@ -245,6 +258,12 @@ public class TerrainGenerator {
                     edge.roughMutate();
                 }
             }
+            for (Edge edge: edges) {
+                for (Point p: edge.getPoints()) {
+                    System.out.print(p.toString() + " ");
+                }
+            }
+            System.out.println();
         }
 
         //Collate all points from edges, which may be single sides or a set of sides
@@ -255,6 +274,10 @@ public class TerrainGenerator {
                     points.add(point);
                 }
             }
+            /*for (Point p: points) {
+                System.out.println(p.toString());
+            }
+            System.out.println();*/
         }
 
         //Find all valid points in order of the shape.
@@ -266,7 +289,7 @@ public class TerrainGenerator {
             for (Point point: points) {
                 twoDimensionPoints.add(point);
             }
-            //System.out.println(twoDimensionPoints.size());
+            //xSystem.out.println(twoDimensionPoints.size());
             List<Point> result = Triangulate.process(twoDimensionPoints);
             float[] vertices = new float[result.size() * 3];
             for (int i = 0; i < result.size(); i++) {
