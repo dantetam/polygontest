@@ -67,8 +67,6 @@ public class Triangulate {
         return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
     }
 
-    ;
-
     public static boolean snip(List<Point> contour, int u, int v, int w, int n, int[] V) {
         int p;
         float Ax, Ay, Bx, By, Cx, Cy, Px, Py;

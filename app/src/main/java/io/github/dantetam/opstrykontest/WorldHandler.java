@@ -338,7 +338,7 @@ public class WorldHandler {
 
             int i = 0;
             for (TerrainGenerator.Polygon hex: generator.hexes) {
-                float[][] hexData = hex.getHexagonData();
+                float[][] hexData = hex.getVertexData();
 
                 /*for (int j = 0; j < hexData[0].length; j++) {
                     System.out.print(hexData[0][j] + " ");

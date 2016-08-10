@@ -12,7 +12,7 @@ public class TerrainGenerator {
 
     public Point[][] allPoints;
     public List<Polygon> hexes;
-    public EdgeInterface[][] allEdges;
+    //public Edge[][] allEdges;
 
     public TerrainGenerator(int len, float scale) {
         hexagonProcess(len, scale);
@@ -26,10 +26,10 @@ public class TerrainGenerator {
                 float x = scale*i*0.75f, y = scale*j*0.5f;
                 if ((j % 2 == 0 && i % 2 == 1) || (j % 2 == 1 && i % 2 == 0)) x -= scale*0.125f;
                 else x += scale*0.125f;
-                /*x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
-                y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;*/
+                //x += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
+                //y += (float)(Math.random()*scale*0.25f*2) - scale*0.25f;
                 allPoints[i][j] = new Point(x, y, 0);
-                allPoints[i][j].texData = new float[]{x / (scale*0.5f*len), y / (scale*0.75f*len)};
+                allPoints[i][j].texData = new float[]{x / (0.5f*len), y / (0.75f*len)};
             }
         }
         /*for (int r = 0; r < len - 2; r += 2) {
@@ -76,10 +76,13 @@ public class TerrainGenerator {
                 hexes.add(new Polygon(hex));
             }
         }
+        /*for (Polygon hex: hexes) {
+            hex.roughMutateAllValidEdges();
+        }*/
     }
 
     public static int SEGMENTS = 16, SAMPLE_SEGMENT = 4;
-    public EdgeGroup roughEdge(EdgeSingle edge) {
+    public List<Edge> roughEdge(Edge edge) {
         float[] newEdgeData = new PerlinNoiseLine(870).generatePerlinLine(SEGMENTS, 0.5f, 0.25f);
         //float slope = edge.slope();
         float normalSlope = - 1f / edge.slope();
@@ -94,11 +97,12 @@ public class TerrainGenerator {
         }
         points.add(0, edge.edge0());
         points.add(edge.edge1());
-        List<EdgeSingle> results = new ArrayList<>();
+        List<Edge> results = new ArrayList<>();
         for (int i = 0; i < points.size() - 1; i++) {
-            results.add(new EdgeSingle(points.get(i), points.get(i + 1)));
+            results.add(new Edge(points.get(i), points.get(i + 1)));
         }
-        return new EdgeGroup(results);
+        return results;
+        //return new EdgeGroup(results);
     }
 
     /*public void addRoughEdges(Polygon polygon) {
@@ -114,9 +118,7 @@ public class TerrainGenerator {
         }
     }*/
 
-    public class EdgeGroup extends EdgeSingle {
-        public List<EdgeSingle> edges;
-        public List<Point> points;
+    /*public class EdgeGroup extends EdgeSingle {
         public EdgeGroup(Point p0, Point p1) {
             super(p0, p1);
             throw new IllegalArgumentException("Cannot use this constructor, possibly EdgeSingle?");
@@ -131,12 +133,33 @@ public class TerrainGenerator {
         public Object getPointsInOrder() {
             return points;
         }
-    }
+    }*/
 
-    public class Edge implements EdgeInterface {
+    public class Edge {
         private Point edge0, edge1;
         public float slope;
-        public EdgeSingle(Point p0, Point p1) {
+        private List<Edge> childEdges;
+        public List<Point> points;
+
+        public List<Edge> getChildEdges() {
+            return childEdges;
+        }
+
+        //Return all the points that this edge object traverses over
+        public List<Point> getPoints() {
+            points = new ArrayList<>();
+            if (childEdges != null) {
+                for (Edge edge : childEdges) {
+                    points.add(edge.edge0);
+                }
+            }
+            else {
+                points.add(edge0());
+            }
+            return points;
+        }
+
+        public Edge(Point p0, Point p1) {
             if (p0.x < p1.x) {
                 edge0 = p0;
                 edge1 = p1;
@@ -152,6 +175,10 @@ public class TerrainGenerator {
                 slope = (edge1.y - edge0.y) / (edge0.x - edge1.x);
             }
         }
+        /*public Edge(List<Edge> list) {
+            childEdges = list;
+            edge0 = null; edge1 = null;
+        }*/
         public Point edge0() {return edge0;}
         public Point edge1() {return edge1;}
         public float slope() {
@@ -166,20 +193,21 @@ public class TerrainGenerator {
             float offZ = (edge1.z - edge0.z) * percent;
             return new Point(edge0.x + offX, edge1.y + offY, edge0.z + offZ);
         }
-        public Object getPointsInOrder() {
+        /*public Object getPointsInOrder() {
             List<Point> points = new ArrayList<>();
             points.add(edge0);
             return points;
+        }*/
+        public void roughMutate() {
+            childEdges = roughEdge(this);
+            edge0 = null;
+            edge1 = null;
         }
-    }
-
-    public interface EdgeInterface {
-        Object getPointsInOrder();
     }
 
     //Work around type erasure for generics.
     public class PointList extends ArrayList<Point> {}
-    public class EdgeList extends ArrayList<EdgeInterface> {}
+    public class EdgeList extends ArrayList<Edge> {}
 
     public class Polygon {
         public List<Polygon> neighbors;
@@ -191,9 +219,9 @@ public class TerrainGenerator {
             points = createFromPoints;
             edges = new EdgeList();
             for (int i = 0; i < points.size() - 1; i++) {
-                edges.add(new EdgeSingle(points.get(i), points.get(i + 1)));
+                edges.add(new Edge(points.get(i), points.get(i + 1)));
             }
-            edges.add(new EdgeSingle(points.get(points.size() - 1), points.get(0)));
+            edges.add(new Edge(points.get(points.size() - 1), points.get(0)));
         }
 
         public Polygon(EdgeList createFromEdges) {
@@ -212,26 +240,25 @@ public class TerrainGenerator {
         }
 
         public void roughMutateAllValidEdges() {
-            for (EdgeInterface edge: edges) {
-
+            for (Edge edge: edges) {
+                if (edge.getChildEdges() == null) {
+                    edge.roughMutate();
+                }
             }
         }
 
+        //Collate all points from edges, which may be single sides or a set of sides
         private void findPoints() {
             points = new ArrayList<>();
-            for (EdgeInterface edge: edges) {
-                if (edge instanceof EdgeSingle) {
-                    points.add(((EdgeSingle)edge).edge0());
-                }
-                else {
-                    EdgeGroup group = (EdgeGroup) edge;
-                    for (EdgeSingle childEdge: group.edges) {
-                        points.add(childEdge.edge0());
-                    }
+            for (Edge edge: edges) {
+                for (Point point: edge.getPoints()) {
+                    points.add(point);
                 }
             }
         }
 
+        //Find all valid points in order of the shape.
+        //Then triangulate, and send the triangle vertex data into a float array.
         public float[][] getVertexData() {
             findPoints();
 
@@ -239,6 +266,7 @@ public class TerrainGenerator {
             for (Point point: points) {
                 twoDimensionPoints.add(point);
             }
+            //System.out.println(twoDimensionPoints.size());
             List<Point> result = Triangulate.process(twoDimensionPoints);
             float[] vertices = new float[result.size() * 3];
             for (int i = 0; i < result.size(); i++) {
