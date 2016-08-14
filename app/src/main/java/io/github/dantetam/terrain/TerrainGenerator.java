@@ -95,12 +95,16 @@ public class TerrainGenerator {
 
         System.out.println(edge.edge0 + " " + edge.edge1);
 
+        System.out.println(normalSlope + " " + angle);
+
         for (int i = SAMPLE_SEGMENT / 2; i < SEGMENTS; i += SAMPLE_SEGMENT) {
             float mid = (float) i / (float) SEGMENTS;
             Point between = edge.inBetween(mid);
             newEdgeData[i] = Math.abs(newEdgeData[i]);
             Point newPoint = between.add(new Point(newEdgeData[i]*(float)Math.cos(angle), newEdgeData[i]*(float)Math.sin(angle), 0));
             points.add(newPoint);
+            System.out.println(mid + " " + between + " " + " " + newPoint);
+            System.out.println(newEdgeData[i] + " " + newEdgeData[i]*(float)Math.cos(angle) + " " + newEdgeData[i]* (float)Math.sin(angle));
         }
         points.add(0, edge.edge0());
         points.add(edge.edge1());

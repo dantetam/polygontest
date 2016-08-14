@@ -111,7 +111,7 @@ public class Triangulate {
 
         int i = 0;
         for (Point p: contour) {
-            System.out.print(p.toString(i) + " ");
+            System.out.print(p.toString() + " ");
             i++;
         }
         System.out.println("--------");
